@@ -16,6 +16,8 @@ import CycleLength from "./screens/CycleLength";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import LoginScreen from "./screens/LoginScreen";
 import OTPScreen from "./screens/OTPScreen";
+import RegistrationScreen from "./screens/registration";
+import RegisterOTPScreen from "./screens/registrationOTP";
 
 export type RootStackParamList = {
   StartJourney: undefined;
@@ -30,7 +32,9 @@ export type RootStackParamList = {
   CycleLength: undefined;
    Welcome: undefined;
   LoginScreen: undefined;
+  RegistrationScreen: undefined;
   OTP: { contact: string };
+  RegisterOTP: { contact: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,6 +44,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+           <Stack.Screen name="RegistrationScreen" component={RegistrationScreen} />
+           <Stack.Screen name="RegisterOTP" component={RegisterOTPScreen} />
         <Stack.Screen name="StartJourney" component={StartJourney} />
         <Stack.Screen name="AgeStep" component={AgeStep} />
         <Stack.Screen name="DOBStep" component={DOBStep} />

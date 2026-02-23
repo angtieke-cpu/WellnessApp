@@ -1,5 +1,14 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  StatusBar,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import LinearGradient from 'react-native-linear-gradient';
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../App";
@@ -10,44 +19,134 @@ export default function WelcomeScreen() {
   const navigation = useNavigation<NavProp>();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome</Text>
+    <LinearGradient
+      colors={["#F9E7F0", "#E8A6C9"]}
+      style={styles.gradient}
+    >
+      <StatusBar barStyle="light-content" />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("LoginScreen")}
-      >
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.card}>
+          <Image
+            source={require("../assets/well_logo.jpeg")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
-      <TouchableOpacity style={styles.outlineButton} 
-       onPress={() => navigation.navigate("StartJourney")}
-      >
-        <Text style={styles.outlineText}>Sign Up</Text>
-      </TouchableOpacity>
-    </View>
+          <Text style={styles.title}>Her Solace</Text>
+          <Text style={styles.subtitle}>
+            Decode Hormones — Discover You
+          </Text>
+          <Text style={styles.smallText}>
+            Hormonal Intelligence for Every Stage
+          </Text>
+
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => navigation.navigate("LoginScreen")}
+          >
+            <Text style={styles.primaryText}>Login</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => navigation.navigate("RegistrationScreen")}
+          >
+            <Text style={styles.secondaryText}>Create Account</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 28, marginBottom: 40 },
-  button: {
-    backgroundColor: "#E8A6C9",
-    padding: 14,
-    width: 200,
-    borderRadius: 10,
+  gradient: {
+    flex: 1,
+  },
+
+  container: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 15
+    padding: 20,
   },
-  buttonText: { color: "#fff", fontSize: 16 },
-  outlineButton: {
-    borderWidth: 1,
+
+  card: {
+    width: "100%",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 28,
+    padding: 30,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 12,
+  },
+
+  logo: {
+    height: 80,
+    width: 80,
+    marginBottom: 16,
+  },
+
+  title: {
+    fontSize: 26,
+    fontWeight: "800",
+    // color: "#8f6aa8",
+    color: "#E8A6C9",
+    letterSpacing: 0.5,
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: "#444",
+    marginTop: 6,
+    textAlign: "center",
+  },
+
+  smallText: {
+    fontSize: 12,
+    color: "#777",
+    marginTop: 4,
+    marginBottom: 30,
+    textAlign: "center",
+  },
+
+  primaryButton: {
+    width: "100%",
+    // backgroundColor: "#8f6aa8",
+    backgroundColor: "#E8A6C9",
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: "center",
+    marginBottom: 14,
+    elevation: 5,
+  },
+
+  primaryText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  secondaryButton: {
+    width: "100%",
+    borderWidth: 1.5,
+    // borderColor: "#8f6aa8",
     borderColor: "#E8A6C9",
-    padding: 14,
-    width: 200,
-    borderRadius: 10,
-    alignItems: "center"
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: "center",
   },
-  outlineText: { color: "#E8A6C9" }
+
+  secondaryText: {
+    // color: "#8f6aa8",
+    color: "#E8A6C9",
+    fontSize: 15,
+    fontWeight: "600",
+  },
 });
+
