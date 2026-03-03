@@ -18,11 +18,16 @@ import LoginScreen from "./screens/LoginScreen";
 import OTPScreen from "./screens/OTPScreen";
 import RegistrationScreen from "./screens/registration";
 import RegisterOTPScreen from "./screens/registrationOTP";
+import HormoneDashboard from "./screens/homeDashboardScreen";
+import StepSix from "./screens/StepEight";
 
 export type RootStackParamList = {
   StartJourney: undefined;
   AgeStep: undefined;
   DOBStep: undefined;
+  StepSix: undefined;
+  StepSeven: undefined;
+  StepEight: undefined;
   LastPeriod: undefined;
   Home: undefined;
   Fertility: undefined;
@@ -31,6 +36,7 @@ export type RootStackParamList = {
   Profile: undefined;
   CycleLength: undefined;
    Welcome: undefined;
+   HomeDashboard:undefined
   LoginScreen: undefined;
   RegistrationScreen: undefined;
   OTP: { contact: string };
@@ -49,9 +55,13 @@ export default function App() {
         <Stack.Screen name="StartJourney" component={StartJourney} />
         <Stack.Screen name="AgeStep" component={AgeStep} />
         <Stack.Screen name="DOBStep" component={DOBStep} />
+        <Stack.Screen name="StepSix" component={StepSix} />
+        <Stack.Screen name="StepSeven" component={DOBStep} />
+        <Stack.Screen name="StepEight" component={DOBStep} />
         <Stack.Screen name="LastPeriod" component={LastPeriodStep} />
         <Stack.Screen name="CycleLength" component={CycleLength} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="HomeDashboard" component={HormoneDashboard} />
         <Stack.Screen name="Fertility" component={Fertility} />
         <Stack.Screen name="AI" component={AI} />
         <Stack.Screen name="Insights" component={Insights} />

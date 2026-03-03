@@ -29,7 +29,8 @@ export default function OTPScreen() {
 
   const verifyOTP = () => {
     console.log("Verify OTP:", otp);
-    navigation.replace("Home");
+    // navigation.replace("Home");
+    navigation.replace("HomeDashboard");
   };
 
   return (
