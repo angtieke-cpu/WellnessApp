@@ -38,12 +38,14 @@ export default function WelcomeScreen() {
             Decode Hormones — Discover You
           </Text>
           <Text style={styles.smallText}>
-            Hormonal Intelligence for Every Stage
+            Hormonal Intelligence for Every Stage of Womanhood
           </Text>
 
           <TouchableOpacity
             style={styles.primaryButton}
             onPress={() => navigation.navigate("LoginScreen")}
+            // onPress={() => navigation.navigate("PeriodCalendar")}
+            // onPress={() => navigation.navigate("HomeDashboard",{userId:"123456"})}
           >
             <Text style={styles.primaryText}>Login</Text>
           </TouchableOpacity>

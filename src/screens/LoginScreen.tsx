@@ -41,9 +41,13 @@ export default function LoginScreen() {
 
       if (data?.success) {
         console.log("OTP sent:", data);
-        navigation.navigate("OTP", { contact });
-      } else {
+        navigation.navigate("OTP", { userDetails:{userId:data.userId,contact:contact} });
+      } else if(data.message == "User not found, please signup") {
         Alert.alert("Error", data.message || "Failed to send OTP");
+         navigation.navigate("RegistrationScreen");
+      }
+      else{
+         Alert.alert("Error", data.message || "Failed to send OTP");
       }
 
     } catch (error) {

@@ -1,5 +1,3 @@
-import StaticLineGraph from "../components/StaticLineGraph";
-
 import React from "react";
 import {
   View,
@@ -8,66 +6,51 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-// import Svg, { Path, Circle } from "react-native-svg";
 
-/* =====================================================
-   Animated Graph Component
-===================================================== */
+import HormoneGraph from "./graph";
+import BottomNav from "../components/BottomNav";
+import { useNavigation } from "@react-navigation/native";
 
-// const AnimatedPath = Animated.createAnimatedComponent(Path);
-
-
-
-/* =====================================================
-   Info Card Component
-===================================================== */
+/* ================================
+   INFO CARD
+================================ */
 
 type InfoCardProps = {
   title: string;
   value: string;
   sub: string;
-  level: number; // 0 to 1
 };
+  
 
 const InfoCard: React.FC<InfoCardProps> = ({
   title,
   value,
   sub,
-  level,
 }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardValue}>{value}</Text>
-      <Text style={styles.cardSub}>{sub}</Text>
 
-      <View style={styles.sliderWrapper}>
-        <View style={styles.sliderTrack} />
-        <View
-          style={[
-            styles.sliderThumb,
-            { left: `${Math.min(Math.max(level * 100, 0), 100)}%` },
-          ]}
-        />
-        <View style={styles.sliderLabels}>
-          <Text style={styles.sliderLabel}>Low</Text>
-          <Text style={styles.sliderLabel}>High</Text>
-        </View>
-      </View>
+      <Text style={styles.cardValue}>{value}</Text>
+
+      <Text style={styles.cardSub}>{sub}</Text>
     </View>
   );
 };
 
-/* =====================================================
-   Small Card Component
-===================================================== */
+/* ================================
+   SMALL CARD
+================================ */
 
 type SmallCardProps = {
   title: string;
   desc: string;
 };
 
-const SmallCard: React.FC<SmallCardProps> = ({ title, desc }) => {
+const SmallCard: React.FC<SmallCardProps> = ({
+  title,
+  desc,
+}) => {
   return (
     <View style={styles.smallCard}>
       <Text style={styles.smallTitle}>{title}</Text>
@@ -76,98 +59,125 @@ const SmallCard: React.FC<SmallCardProps> = ({ title, desc }) => {
   );
 };
 
-/* =====================================================
-   Main Screen
-===================================================== */
-  const sampleData = [20, 45, 28, 80, 99, 43, 50];
+/* ================================
+   MAIN SCREEN
+================================ */
 
 const HormoneDashboard: React.FC = () => {
+  const navigation = useNavigation<any>();
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={{ flex: 1 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 90 }}
+      showsVerticalScrollIndicator={false}
+    >
       {/* GRAPH CARD */}
+
       <View style={styles.graphCard}>
-        <Text style={styles.dayTitle}>Day 22 • Luteal Phase</Text>
-        <Text style={styles.subtitle}>
-          Progesterone dominant • Emotional sensitivity may increase.
+        <Text style={styles.dayTitle}>
+          Day 22 • Luteal Phase
         </Text>
 
-     <StaticLineGraph data={sampleData} />
+        <Text style={styles.subtitle}>
+          Progesterone dominant • Emotional sensitivity may
+          increase.
+        </Text>
+
+        <View style={styles.graphWrapper}>
+          <HormoneGraph />
+        </View>
       </View>
 
-      {/* GRID */}
+      {/* INFO GRID */}
+
       <View style={styles.grid}>
         <InfoCard
           title="Energy ✨"
           value="Moderate"
           sub="Progesterone dominant"
-          level={0.5}
         />
 
         <InfoCard
-          title="Mood"
+          title="Mood 😊"
           value="Sensitive"
           sub="Late luteal phase detected"
-          level={0.8}
         />
 
         <InfoCard
-          title="Anxiety"
+          title="Anxiety 🌿"
           value="Slightly Elevated"
           sub="Common before period"
-          level={0.7}
         />
 
         <InfoCard
-          title="Social ✨"
+          title="Social 🤝"
           value="Low Drive"
           sub="Plan lighter conversations"
-          level={0.3}
         />
       </View>
 
-      {/* BUTTON */}
+      {/* LOG BUTTON */}
+
       <TouchableOpacity style={styles.logButton}>
-        <Text style={styles.logText}>＋ Log Your Symptoms</Text>
+        <Text style={styles.logText}>
+          ＋ Log Your Symptoms
+        </Text>
       </TouchableOpacity>
 
-      {/* BOTTOM CARDS */}
+      {/* BOTTOM INSIGHTS */}
+
       <View style={styles.bottomRow}>
         <SmallCard
           title="Nutrition"
           desc="Magnesium-rich foods may help."
         />
+
         <SmallCard
           title="Movement"
           desc="Try a gentle walk or stretching."
         />
+
         <SmallCard
           title="Mindful Insight"
-          desc="Reflective time 3 days before period."
+          desc="Reflective time before your cycle."
         />
       </View>
     </ScrollView>
+   
+    <BottomNav active="HomeDashboard" onChange={(route) => navigation.navigate(route)} />
+      </View>
   );
 };
 
 export default HormoneDashboard;
 
-/* =====================================================
-   Styles
-===================================================== */
+/* ================================
+   STYLES
+================================ */
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3edf7",
+    backgroundColor: "#f4f1fa",
     padding: 16,
   },
+
+  /* GRAPH CARD */
 
   graphCard: {
     backgroundColor: "#ffffff",
     borderRadius: 24,
     padding: 18,
-    marginBottom: 20,
-    elevation: 8,
+    marginBottom: 22,
+    elevation: 6,
+    overflow: "hidden",
+  },
+
+  graphWrapper: {
+    height: 200,
+    justifyContent: "center",
+    marginTop: 10,
   },
 
   dayTitle: {
@@ -177,10 +187,13 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#777",
-    marginBottom: 12,
+    marginTop: 4,
+    marginBottom: 10,
   },
+
+  /* GRID */
 
   grid: {
     flexDirection: "row",
@@ -188,75 +201,53 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
+  /* INFO CARD */
+
   card: {
     width: "48%",
     backgroundColor: "#ffffff",
-    borderRadius: 22,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
-    elevation: 6,
+    elevation: 4,
   },
 
   cardTitle: {
     fontSize: 12,
-    color: "#999",
+    color: "#a79bc8",
+    marginBottom: 6,
   },
 
   cardValue: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "700",
-    marginTop: 4,
-    color: "#444",
+    color: "#3f3a56",
   },
 
   cardSub: {
-    fontSize: 11,
-    marginTop: 4,
-    color: "#888",
-  },
-
-  sliderWrapper: {
-    marginTop: 12,
-  },
-
-  sliderTrack: {
-    height: 4,
-    backgroundColor: "#e0cbe8",
-    borderRadius: 4,
-  },
-
-  sliderThumb: {
-    position: "absolute",
-    top: -6,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#b39ddb",
-  },
-
-  sliderLabels: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    fontSize: 12,
+    color: "#777",
     marginTop: 6,
   },
 
-  sliderLabel: {
-    fontSize: 10,
-    color: "#888",
-  },
+  /* LOG BUTTON */
 
   logButton: {
     backgroundColor: "#c27ba0",
     paddingVertical: 16,
-    borderRadius: 28,
+    borderRadius: 30,
     alignItems: "center",
     marginVertical: 24,
+    elevation: 4,
   },
 
   logText: {
     color: "#fff",
     fontWeight: "600",
+    fontSize: 15,
   },
+
+  /* BOTTOM CARDS */
 
   bottomRow: {
     flexDirection: "row",
@@ -268,17 +259,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 18,
     padding: 14,
-    elevation: 4,
+    elevation: 3,
   },
 
   smallTitle: {
     fontSize: 12,
     fontWeight: "600",
     marginBottom: 6,
+    color: "#4b3f72",
   },
 
   smallDesc: {
-    fontSize: 10,
+    fontSize: 11,
     color: "#777",
   },
 });

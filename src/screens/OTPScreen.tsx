@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Pressable,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,6 +21,7 @@ export default function OTPScreen() {
   const route = useRoute<RouteProps>();
 
   const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const handleChange = (text: string) => {
@@ -27,16 +30,50 @@ export default function OTPScreen() {
     }
   };
 
-  const verifyOTP = () => {
+  const verifyOTP = async () => {
     console.log("Verify OTP:", otp);
     // navigation.replace("Home");
-    navigation.replace("HomeDashboard");
+    try {
+          setLoading(true);
+          const response:any = await fetch("https://her-solace-api.vercel.app/api/auth/verify-otp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: 
+            JSON.stringify({ 
+              "purpose":"login",
+              "otp":otp,
+              "userId":route.params.userDetails.userId
+            })
+            
+          });
+       
+    
+          const data = await response.json();
+          
+    
+          if (data?.success) {
+            console.log("OTP sent:", data);
+            navigation.replace("HomeDashboard",{userId:route.params.userDetails.userId});
+          } else {
+            Alert.alert("Error", data.message || "Failed to send OTP");
+          }
+    
+        } catch (error) {
+          console.error("OTP API Error:", error);
+          Alert.alert("Error", "Something went wrong");
+        } finally {
+          // setLoading(false);
+        }
+    
+   
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Enter OTP</Text>
-      <Text style={styles.subtitle}>Sent to {route.params.contact}</Text>
+      <Text style={styles.subtitle}>Sent to {route.params.userDetails.contact}</Text>
 
       {/* OTP BOXES */}
       <Pressable
@@ -76,7 +113,11 @@ export default function OTPScreen() {
         disabled={otp.length !== 6}
         onPress={verifyOTP}
       >
+        {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
         <Text style={styles.buttonText}>Verify</Text>
+                )}
       </TouchableOpacity>
     </View>
   );

@@ -20,9 +20,11 @@ import RegistrationScreen from "./screens/registration";
 import RegisterOTPScreen from "./screens/registrationOTP";
 import HormoneDashboard from "./screens/homeDashboardScreen";
 import StepSix from "./screens/StepEight";
+import PeriodCalendar from "./screens/PeriodCalendar";
+// import MainTabs from "./components/MainTabs";
 
 export type RootStackParamList = {
-  StartJourney: undefined;
+  StartJourney: { userId: string };
   AgeStep: undefined;
   DOBStep: undefined;
   StepSix: undefined;
@@ -36,11 +38,13 @@ export type RootStackParamList = {
   Profile: undefined;
   CycleLength: undefined;
    Welcome: undefined;
-   HomeDashboard:undefined
+   PeriodCalendar:undefined;
+  //  MainTabs:undefined;
+   HomeDashboard:{ userId: string }
   LoginScreen: undefined;
   RegistrationScreen: undefined;
-  OTP: { contact: string };
-  RegisterOTP: { contact: string };
+  OTP: { userDetails:{ userId:string,contact:string  }};
+  RegisterOTP: { userDetails:{ userId:string,contact:string  } };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -58,6 +62,7 @@ export default function App() {
         <Stack.Screen name="StepSix" component={StepSix} />
         <Stack.Screen name="StepSeven" component={DOBStep} />
         <Stack.Screen name="StepEight" component={DOBStep} />
+        <Stack.Screen name="PeriodCalendar" component={PeriodCalendar} />
         <Stack.Screen name="LastPeriod" component={LastPeriodStep} />
         <Stack.Screen name="CycleLength" component={CycleLength} />
         <Stack.Screen name="Home" component={Home} />
@@ -66,6 +71,7 @@ export default function App() {
         <Stack.Screen name="AI" component={AI} />
         <Stack.Screen name="Insights" component={Insights} />
         <Stack.Screen name="Profile" component={Profile} />
+          {/* <Stack.Screen name="MainTabs" component={MainTabs} /> */}
       
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="OTP" component={OTPScreen} />
