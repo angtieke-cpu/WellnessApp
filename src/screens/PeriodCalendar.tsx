@@ -1,4 +1,4 @@
-import React, { useMemo, useState,useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { format, subDays, eachDayOfInterval } from "date-fns";
@@ -9,51 +9,61 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function PeriodCalendar() {
 
   const navigation = useNavigation<any>();
-  const [calenderData, setcalenderData] = useState<any>(null);
-useEffect(() => {
-  getcalenderData();
-}, []);
-const getcalenderData = async () => {
-  try {
-    const token = await AsyncStorage.getItem("token");
 
-    const response = await fetch(
-      "https://her-solace-api.vercel.app/api/journey/cycle-details",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  const [calenderData, setCalenderData] = useState<any>(null);
 
-    const result = await response.json();
-
-    if (result.success) {
-      setcalenderData(result);
-      console.log("Home Data:", result);
-    } else {
-      console.log("API Error");
-    }
-  } catch (error) {
-    console.log("Error:", error);
-  }
-};
-
-  // const [lastPeriod] = useState(new Date("2026-03-04"));
-  // const [cycleLength] = useState(28);
-  const [lastPeriod, setLastPeriod] = useState<Date | any>(null);
-const [cycleLength, setCycleLength] = useState<number>(28);
- setLastPeriod(new Date(calenderData.lastPeriodDate));
-  setCycleLength(calenderData.cycleLength);
-  const [periodLength] = useState(5);
+  const periodLength = 5;
 
   const today = new Date();
 
+  useEffect(() => {
+    getCalendarData();
+  }, []);
+
+  const getCalendarData = async () => {
+    try {
+
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await fetch(
+        "https://her-solace-api.vercel.app/api/journey/cycle-details",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        setCalenderData(result);
+      }
+
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  /* ---------- SAFE DATA ---------- */
+
+  const lastPeriod = useMemo(() => {
+    if (!calenderData?.lastPeriodDate) {
+      return new Date();
+    }
+    return new Date(calenderData.lastPeriodDate);
+  }, [calenderData]);
+
+  const cycleLength = useMemo(() => {
+    return calenderData?.cycleLength ?? 28;
+  }, [calenderData]);
+
+  /* ---------- CURRENT CYCLE DAY ---------- */
+
   const diffTime = today.getTime() - lastPeriod.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
   const currentCycleDay = (diffDays % cycleLength) + 1;
 
   const getDate = (date: Date) => date.toISOString().split("T")[0];
@@ -64,84 +74,12 @@ const [cycleLength, setCycleLength] = useState<number>(28);
     return d;
   };
 
-  const marked: any = {};
-
-  /* ---------- 5 MONTH PREDICTION ---------- */
-
-  for (let cycle = 0; cycle < 5; cycle++) {
-
-    const cycleStart = addDays(lastPeriod, cycle * cycleLength);
-
-    // PERIOD
-    for (let i = 0; i < periodLength; i++) {
-      const d = addDays(cycleStart, i);
-
-      marked[getDate(d)] = {
-        customStyles: {
-          container: {
-            backgroundColor: "#ff6b6b",
-            borderRadius: 20
-          },
-          text: { color: "white" }
-        }
-      };
-    }
-
-    // OVULATION
-    const ovulation = addDays(cycleStart, cycleLength - 14);
-
-    marked[getDate(ovulation)] = {
-      customStyles: {
-        container: {
-          backgroundColor: "#4dabf7",
-          borderRadius: 20
-        },
-        text: { color: "white" }
-      }
-    };
-
-    // FERTILE WINDOW
-    for (let i = -4; i <= 1; i++) {
-      const d = addDays(ovulation, i);
-
-      if (!marked[getDate(d)]) {
-        marked[getDate(d)] = {
-          customStyles: {
-            container: {
-              backgroundColor: "#f6c343",
-              borderRadius: 20
-            },
-            text: { color: "white" }
-          }
-        };
-      }
-    }
-
-    // PMS WINDOW
-    const nextPeriod = addDays(cycleStart, cycleLength);
-
-    for (let i = -4; i < 0; i++) {
-      const d = addDays(nextPeriod, i);
-
-      if (!marked[getDate(d)]) {
-        marked[getDate(d)] = {
-          customStyles: {
-            container: {
-              backgroundColor: "#b197fc",
-              borderRadius: 20
-            },
-            text: { color: "white" }
-          }
-        };
-      }
-    }
-  }
-
-  /* ---------- Cycle Data ---------- */
+  /* ---------- CYCLE DATA ---------- */
 
   const cycleData = useMemo(() => {
 
     const ovulation = addDays(lastPeriod, cycleLength - 14);
+
     const fertileStart = subDays(ovulation, 4);
     const fertileEnd = addDays(ovulation, 1);
 
@@ -166,6 +104,94 @@ const [cycleLength, setCycleLength] = useState<number>(28);
     };
 
   }, [lastPeriod, cycleLength, periodLength]);
+
+  /* ---------- LOADING SCREEN ---------- */
+
+  if (!calenderData) {
+    return (
+      <View style={{ flex:1, justifyContent:"center", alignItems:"center" }}>
+        <Text>Loading Calendar...</Text>
+      </View>
+    );
+  }
+
+  /* ---------- CALENDAR MARKS ---------- */
+
+  const marked: Record<string, any> = {};
+
+  for (let cycle = 0; cycle < 5; cycle++) {
+
+    const cycleStart = addDays(lastPeriod, cycle * cycleLength);
+
+    for (let i = 0; i < periodLength; i++) {
+
+      const d = addDays(cycleStart, i);
+
+      marked[getDate(d)] = {
+        customStyles: {
+          container: {
+            backgroundColor: "#ff6b6b",
+            borderRadius: 20
+          },
+          text: { color: "white" }
+        }
+      };
+
+    }
+
+    const ovulation = addDays(cycleStart, cycleLength - 14);
+
+    marked[getDate(ovulation)] = {
+      customStyles: {
+        container: {
+          backgroundColor: "#4dabf7",
+          borderRadius: 20
+        },
+        text: { color: "white" }
+      }
+    };
+
+    for (let i = -4; i <= 1; i++) {
+
+      const d = addDays(ovulation, i);
+
+      if (!marked[getDate(d)]) {
+        marked[getDate(d)] = {
+          customStyles: {
+            container: {
+              backgroundColor: "#f6c343",
+              borderRadius: 20
+            },
+            text: { color: "white" }
+          }
+        };
+      }
+
+    }
+
+    const nextPeriod = addDays(cycleStart, cycleLength);
+
+    for (let i = -4; i < 0; i++) {
+
+      const d = addDays(nextPeriod, i);
+
+      if (!marked[getDate(d)]) {
+        marked[getDate(d)] = {
+          customStyles: {
+            container: {
+              backgroundColor: "#b197fc",
+              borderRadius: 20
+            },
+            text: { color: "white" }
+          }
+        };
+      }
+
+    }
+
+  }
+
+
 
   return (
 
@@ -194,7 +220,7 @@ const [cycleLength, setCycleLength] = useState<number>(28);
           }}
         />
 
-        {/* ---------- Legend ---------- */}
+        {/* Legend */}
 
         <View style={styles.legend}>
 
@@ -220,7 +246,7 @@ const [cycleLength, setCycleLength] = useState<number>(28);
 
         </View>
 
-        {/* ---------- Cycle Trends Card ---------- */}
+        {/* Cycle Trends */}
 
         <View style={styles.trendCard}>
 
