@@ -5,7 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Dimensions
+  Dimensions,
+  Alert
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -39,6 +40,40 @@ export default function StartJourney() {
   });
 
   const next = () => {
+      if (index === 1 && !data.ageGroup) {
+    Alert.alert("Please select your age group");
+    return;
+  }
+
+  if (index === 2 && !data.dob) {
+    Alert.alert("Please select your date of birth");
+    return;
+  }
+
+  if (index === 3 && !data.cycleLength) {
+    Alert.alert("Please select cycle length");
+    return;
+  }
+
+  if (index === 4 && data.symptoms.length === 0) {
+    Alert.alert("Please select at least one symptom");
+    return;
+  }
+
+  if (index === 5 && data.goals.length === 0) {
+    Alert.alert("Please select at least one wellness goal");
+    return;
+  }
+
+  if (index === 6 && data.conditions.length === 0) {
+    Alert.alert("Please select condition or None");
+    return;
+  }
+
+  if (index === 7 && data.advancedSymptoms.length === 0) {
+    Alert.alert("Please select symptoms to track");
+    return;
+  }
     if (index < TOTAL_STEPS - 1) {
       flatRef.current?.scrollToIndex({
         index: index + 1,
@@ -56,22 +91,65 @@ export default function StartJourney() {
     }
   };
 
+  // const finish = async () => {
+  //   try {
+  //     console.log("USER ONBOARDING DATA =>", data);
+
+  //     await AsyncStorage.setItem(
+  //       "onboarding",
+  //       JSON.stringify(data)
+  //     );
+
+  //     // navigation.navigate("Home");
+  //     navigation.navigate("HomeDashboard");
+  //   } catch (error) {
+  //     console.log("Error saving onboarding:", error);
+  //   }
+  // };
+
+
   const finish = async () => {
-    try {
-      console.log("USER ONBOARDING DATA =>", data);
+  try {
+    const token = await AsyncStorage.getItem("token");
 
-      await AsyncStorage.setItem(
-        "onboarding",
-        JSON.stringify(data)
-      );
+    const body = {
+      ageGroup: data.ageGroup,
+      dateOfBirth: data.dob.toISOString().split("T")[0],
+      cycleLengthDays: data.cycleLength,
+      symptoms: data.symptoms,
+      lastPeriodDate: data.lastPeriod.toISOString().split("T")[0],
+      healthGoals: data.goals,
+      diagnosedConditions: data.conditions,
+      trackingSymptoms: data.advancedSymptoms
+    };
 
-      // navigation.navigate("Home");
+    const response = await fetch(
+      "https://her-solace-api.vercel.app/api/journey/details",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      }
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+      // await AsyncStorage.setItem("onboarding", JSON.stringify(data));
+
       navigation.navigate("HomeDashboard");
-    } catch (error) {
-      console.log("Error saving onboarding:", error);
+    } else {
+      Alert.alert("Error", result.message || "Something went wrong");
     }
-  };
 
+  } catch (error) {
+    console.log("API ERROR", error);
+    Alert.alert("Network error");
+  }
+};
   const renderProgress = () => (
     <View style={styles.progressTrack}>
       <View

@@ -1,124 +1,143 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState,useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Calendar } from "react-native-calendars";
-import {
-  // addDays,
-  format,
-  subDays,
-  eachDayOfInterval
-} from "date-fns";
+import { format, subDays, eachDayOfInterval } from "date-fns";
 import BottomNav from "../components/BottomNav";
 import { useNavigation } from "@react-navigation/native";
-// import { generateCycleMarks } from "../utils/cycleUtils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function PeriodCalendar() {
-   const navigation = useNavigation<any>();
 
-//   const lastPeriod = new Date(2024, 2, 4); // March 4
-//   const cycleLength = 28;
-//   const periodLength = 5;
-  const [lastPeriod, setLastPeriod] = useState(new Date("2026-03-04T00:00:00"))
-const [cycleLength, setCycleLength] = useState(28)
-const [periodLength, setPeriodLength] = useState(5)
-const today = new Date();
+  const navigation = useNavigation<any>();
+  const [calenderData, setcalenderData] = useState<any>(null);
+useEffect(() => {
+  getcalenderData();
+}, []);
+const getcalenderData = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
 
-const diffTime = today.getTime() - lastPeriod.getTime();
-const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const response = await fetch(
+      "https://her-solace-api.vercel.app/api/journey/cycle-details",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-const currentCycleDay = (diffDays % cycleLength) + 1;
-//  const markedDates = useMemo(() => {
-//     return generateCycleMarks(lastPeriod, cycleLength, 5, 5);
-//   }, [lastPeriod,cycleLength]);
+    const result = await response.json();
 
-
-
-  const getDate = (date: Date) =>
-  date.toISOString().split("T")[0];
-
-const addDays = (date: Date, days: number) => {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-};
-
-const marked: any = {};
-
-
-// PERIOD DAYS
-for (let i = 0; i < periodLength; i++) {
-  const d = addDays(lastPeriod, i);
-
-  marked[getDate(d)] = {
-    customStyles: {
-      container: {
-        backgroundColor: "#ff6b6b",
-        borderRadius: 20
-      },
-      text: { color: "white" }
+    if (result.success) {
+      setcalenderData(result);
+      console.log("Home Data:", result);
+    } else {
+      console.log("API Error");
     }
-  };
-}
-
-
-// OVULATION DAY
-const ovulation = addDays(lastPeriod, cycleLength - 14);
-
-marked[getDate(ovulation)] = {
-  customStyles: {
-    container: {
-      backgroundColor: "#4dabf7",
-      borderRadius: 20
-    },
-    text: { color: "white" }
+  } catch (error) {
+    console.log("Error:", error);
   }
 };
 
+  // const [lastPeriod] = useState(new Date("2026-03-04"));
+  // const [cycleLength] = useState(28);
+  const [lastPeriod, setLastPeriod] = useState<Date | any>(null);
+const [cycleLength, setCycleLength] = useState<number>(28);
+ setLastPeriod(new Date(calenderData.lastPeriodDate));
+  setCycleLength(calenderData.cycleLength);
+  const [periodLength] = useState(5);
 
-// FERTILE WINDOW (5 days)
-for (let i = -4; i <= 1; i++) {
-  const d = addDays(ovulation, i);
+  const today = new Date();
 
-  if (!marked[getDate(d)]) {
-    marked[getDate(d)] = {
+  const diffTime = today.getTime() - lastPeriod.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  const currentCycleDay = (diffDays % cycleLength) + 1;
+
+  const getDate = (date: Date) => date.toISOString().split("T")[0];
+
+  const addDays = (date: Date, days: number) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  };
+
+  const marked: any = {};
+
+  /* ---------- 5 MONTH PREDICTION ---------- */
+
+  for (let cycle = 0; cycle < 5; cycle++) {
+
+    const cycleStart = addDays(lastPeriod, cycle * cycleLength);
+
+    // PERIOD
+    for (let i = 0; i < periodLength; i++) {
+      const d = addDays(cycleStart, i);
+
+      marked[getDate(d)] = {
+        customStyles: {
+          container: {
+            backgroundColor: "#ff6b6b",
+            borderRadius: 20
+          },
+          text: { color: "white" }
+        }
+      };
+    }
+
+    // OVULATION
+    const ovulation = addDays(cycleStart, cycleLength - 14);
+
+    marked[getDate(ovulation)] = {
       customStyles: {
         container: {
-          backgroundColor: "#f6c343",
+          backgroundColor: "#4dabf7",
           borderRadius: 20
         },
         text: { color: "white" }
       }
     };
-  }
-}
 
+    // FERTILE WINDOW
+    for (let i = -4; i <= 1; i++) {
+      const d = addDays(ovulation, i);
 
-// NEXT PERIOD
-const nextPeriod = addDays(lastPeriod, cycleLength);
-
-
-// PMS WINDOW (4 days before next period)
-for (let i = -4; i < 0; i++) {
-  const d = addDays(nextPeriod, i);
-
-  if (!marked[getDate(d)]) {
-    marked[getDate(d)] = {
-      customStyles: {
-        container: {
-          backgroundColor: "#b197fc",
-          borderRadius: 20
-        },
-        text: { color: "white" }
+      if (!marked[getDate(d)]) {
+        marked[getDate(d)] = {
+          customStyles: {
+            container: {
+              backgroundColor: "#f6c343",
+              borderRadius: 20
+            },
+            text: { color: "white" }
+          }
+        };
       }
-    };
-  }
-}
-//   const Legend = ({color,label}:any) => (
-//   <View style={styles.legendItem}>
-//     <View style={[styles.dot,{backgroundColor:color}]} />
-//     <Text style={styles.legendText}>{label}</Text>
-//   </View>
-// );
+    }
 
+    // PMS WINDOW
+    const nextPeriod = addDays(cycleStart, cycleLength);
+
+    for (let i = -4; i < 0; i++) {
+      const d = addDays(nextPeriod, i);
+
+      if (!marked[getDate(d)]) {
+        marked[getDate(d)] = {
+          customStyles: {
+            container: {
+              backgroundColor: "#b197fc",
+              borderRadius: 20
+            },
+            text: { color: "white" }
+          }
+        };
+      }
+    }
+  }
+
+  /* ---------- Cycle Data ---------- */
 
   const cycleData = useMemo(() => {
 
@@ -136,181 +155,132 @@ for (let i = -4; i < 0; i++) {
       end: addDays(lastPeriod, periodLength - 1)
     });
 
-    const fertileDays = eachDayOfInterval({
-      start: fertileStart,
-      end: fertileEnd
-    });
-
-    const pmsDays = eachDayOfInterval({
-      start: pmsStart,
-      end: pmsEnd
-    });
-
-    const marked: any = {};
-
-    periodDays.forEach(day => {
-      marked[format(day, "yyyy-MM-dd")] = {
-        customStyles: {
-          container: {
-            backgroundColor: "#ff6b81"
-          },
-          text: { color: "white" }
-        }
-      };
-    });
-
-    fertileDays.forEach(day => {
-      marked[format(day, "yyyy-MM-dd")] = {
-        customStyles: {
-          container: {
-            backgroundColor: "#ffd166"
-          },
-          text: { color: "#333" }
-        }
-      };
-    });
-
-    marked[format(ovulation, "yyyy-MM-dd")] = {
-      customStyles: {
-        container: {
-          backgroundColor: "#4dabf7"
-        },
-        text: { color: "white", fontWeight: "bold" }
-      }
-    };
-
-    pmsDays.forEach(day => {
-      marked[format(day, "yyyy-MM-dd")] = {
-        customStyles: {
-          container: {
-            backgroundColor: "#cdb4db"
-          },
-          text: { color: "#333" }
-        }
-      };
-    });
-
     return {
-      marked,
       ovulation,
       fertileStart,
       fertileEnd,
       nextPeriod,
       pmsStart,
-      pmsEnd
+      pmsEnd,
+      periodDays
     };
 
   }, [lastPeriod, cycleLength, periodLength]);
 
   return (
-    
-   <View style={{ flex: 1 }}>
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 90 }}>
 
-      <Text style={styles.logBtn}>🩸 Log Period</Text>
+    <View style={{ flex: 1 }}>
 
-      {/* <Calendar
-        markingType={"custom"}
-        markedDates={cycleData.marked}
-        theme={{
-          calendarBackground: "#f5f7fb",
-          todayTextColor: "#ff6b81",
-          arrowColor: "#555",
-          textMonthFontSize: 18,
-          textMonthFontWeight: "600"
-        }}
-      /> */}
-      <Calendar
-        markingType={"custom"}
-        markedDates={marked}
-        enableSwipeMonths={true}
-        renderArrow={(direction) => (
-          <Text style={{fontSize:22}}>
-            {direction === "left" ? "‹" : "›"}
-          </Text>
-        )}
-        theme={{
-          todayTextColor:"#339af0",
-          selectedDayBackgroundColor:"#ff6b6b",
-          arrowColor:"#333",
-        }}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 90 }}
+      >
+
+        <Text style={styles.logBtn}>🩸 Log Period</Text>
+
+        <Calendar
+          markingType={"custom"}
+          markedDates={marked}
+          enableSwipeMonths={true}
+          renderArrow={(direction) => (
+            <Text style={{ fontSize: 22 }}>
+              {direction === "left" ? "‹" : "›"}
+            </Text>
+          )}
+          theme={{
+            todayTextColor: "#339af0",
+            selectedDayBackgroundColor: "#ff6b6b",
+            arrowColor: "#333"
+          }}
+        />
+
+        {/* ---------- Legend ---------- */}
+
+        <View style={styles.legend}>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.dot, { backgroundColor: "#ff6b6b" }]} />
+            <Text>Period</Text>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.dot, { backgroundColor: "#4dabf7" }]} />
+            <Text>Ovulation</Text>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.dot, { backgroundColor: "#f6c343" }]} />
+            <Text>Fertile Window</Text>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.dot, { backgroundColor: "#b197fc" }]} />
+            <Text>PMS</Text>
+          </View>
+
+        </View>
+
+        {/* ---------- Cycle Trends Card ---------- */}
+
+        <View style={styles.trendCard}>
+
+          <Text style={styles.trendTitle}>Cycle Trends</Text>
+
+          <View style={styles.trendRow}>
+            <Text style={styles.trendLabel}>Next Period</Text>
+            <View style={styles.trendBadge}>
+              <Text style={styles.trendBadgeText}>
+                {format(cycleData.nextPeriod, "MMM d")}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.trendRow}>
+            <Text style={styles.trendLabel}>Ovulation Window</Text>
+            <View style={styles.trendBadge}>
+              <Text style={styles.trendBadgeText}>
+                {format(cycleData.fertileStart, "MMM d")} - {format(cycleData.fertileEnd, "MMM d")}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.trendRow}>
+            <Text style={styles.trendLabel}>Cycle Regularity</Text>
+            <View style={styles.trendBadge}>
+              <Text style={styles.trendBadgeText}>92% • Consistent</Text>
+            </View>
+          </View>
+
+          <View style={styles.trendRow}>
+            <Text style={styles.trendLabel}>Predicted Mood</Text>
+            <View style={styles.trendBadge}>
+              <Text style={styles.trendBadgeText}>Stable</Text>
+            </View>
+          </View>
+
+          <View style={styles.trendRow}>
+            <Text style={styles.trendLabel}>PMS Alert</Text>
+            <View style={styles.trendBadge}>
+              <Text style={styles.trendBadgeText}>
+                {format(cycleData.pmsStart, "MMM d")} - {format(cycleData.pmsEnd, "MMM d")}
+              </Text>
+            </View>
+          </View>
+
+        </View>
+
+      </ScrollView>
+
+      <BottomNav
+        active="PeriodCalendar"
+        onChange={(route) => navigation.navigate(route)}
       />
 
-      {/* Legend */}
-      {/* <View style={styles.legend}>
-
-        <Legend color="#ff6b6b" label="Period" />
-
-        <Legend color="#4dabf7" label="Ovulation" />
-
-        <Legend color="#f6c343" label="Fertile Window" />
-
-        <Legend color="#b197fc" label="PMS" />
-
-      </View> */}
-      <View style={{flexDirection:"row", justifyContent:"space-around"}}>
-
-<View style={styles.legendItem}>
-<View style={[styles.dot,{backgroundColor:"#ff6b6b"}]}/>
-<Text>Period</Text>
-</View>
-
-<View style={styles.legendItem}>
-<View style={[styles.dot,{backgroundColor:"#4dabf7"}]}/>
-<Text>Ovulation</Text>
-</View>
-
-<View style={styles.legendItem}>
-<View style={[styles.dot,{backgroundColor:"#f6c343"}]}/>
-<Text>Fertile Window</Text>
-</View>
-
-<View style={styles.legendItem}>
-<View style={[styles.dot,{backgroundColor:"#b197fc"}]}/>
-<Text>PMS</Text>
-</View>
-
-</View>
-
-      <View style={styles.card}>
-
-        <Text style={styles.dayBadge}>
-          Current Cycle Day: {currentCycleDay}
-        </Text>
-
-        <Text style={styles.info}>
-          🩸 Next Period: {format(cycleData.nextPeriod, "MMM d")}
-        </Text>
-
-        <Text style={styles.info}>
-          🌸 Ovulation Window:
-          {format(cycleData.fertileStart, "MMM d")} -{" "}
-          {format(cycleData.fertileEnd, "MMM d")}
-        </Text>
-
-        <Text style={styles.info}>
-          ⭐ Fertile Window:
-          {format(cycleData.fertileStart, "MMM d")} -{" "}
-          {format(cycleData.fertileEnd, "MMM d")}
-        </Text>
-
-        <Text style={styles.info}>
-          🧠 Predicted PMS:
-          {format(cycleData.pmsStart, "MMM d")} -{" "}
-          {format(cycleData.pmsEnd, "MMM d")}
-        </Text>
-
-        <Text style={styles.info}>
-          📅 Cycle Length: {cycleLength} Days
-        </Text>
-
-      </View>
-
-    </ScrollView>
-    <BottomNav active="PeriodCalendar" onChange={(route) => navigation.navigate(route)} />
     </View>
   );
 }
+
+/* ---------- Styles ---------- */
 
 const styles = StyleSheet.create({
 
@@ -319,29 +289,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
     padding: 20
   },
-  legend:{
-flexDirection:"row",
-justifyContent:"space-around",
-marginTop:20
-},
 
-legendItem:{
-flexDirection:"row",
-alignItems:"center"
-},
+  legend: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20
+  },
 
-dot:{
-width:10,
-height:10,
-borderRadius:5,
-marginRight:6
-},
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
 
-legendText:{
-fontSize:13,
-color:"#555"
-},
-logBtn: {
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6
+  },
+
+  logBtn: {
     alignSelf: "center",
     backgroundColor: "#ff6b81",
     paddingHorizontal: 24,
@@ -352,27 +319,45 @@ logBtn: {
     marginBottom: 15
   },
 
-  card: {
-    marginTop: 20,
-    backgroundColor: "white",
-    padding: 18,
-    borderRadius: 14,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4
+  /* Cycle Trends */
+
+  trendCard: {
+    marginTop: 25
   },
 
-  dayBadge: {
-    fontSize: 16,
+  trendTitle: {
+    fontSize: 18,
     fontWeight: "600",
-    marginBottom: 10
+    marginBottom: 14
   },
 
-  info: {
+  trendRow: {
+    backgroundColor: "#E9E3EC",
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 25,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14
+  },
+
+  trendLabel: {
     fontSize: 14,
-    marginVertical: 4,
-    color: "#555"
+    color: "#222"
+  },
+
+  trendBadge: {
+    backgroundColor: "#D3A7AF",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 15
+  },
+
+  trendBadgeText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600"
   }
 
 });

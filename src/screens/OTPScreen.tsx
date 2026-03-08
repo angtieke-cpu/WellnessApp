@@ -12,6 +12,7 @@ import {
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProps = RouteProp<RootStackParamList, "OTP">;
@@ -55,6 +56,8 @@ export default function OTPScreen() {
     
           if (data?.success) {
             console.log("OTP sent:", data);
+             await AsyncStorage.setItem("token", data?.token);
+             await AsyncStorage.setItem("userId", data?.user?.id);
             navigation.replace("HomeDashboard",{userId:route.params.userDetails.userId});
           } else {
             Alert.alert("Error", data.message || "Failed to send OTP");

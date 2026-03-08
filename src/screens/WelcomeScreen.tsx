@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {
   View,
   Text,
@@ -12,11 +12,26 @@ import LinearGradient from 'react-native-linear-gradient';
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../App";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function WelcomeScreen() {
   const navigation = useNavigation<NavProp>();
+
+useEffect(() => {
+  const checkLogin = async () => {
+  const token = await AsyncStorage.getItem("token");
+  const userId = await AsyncStorage.getItem("userId");
+
+  if (token && userId) {
+    navigation.replace("HomeDashboard", { userId });
+  }
+};
+  checkLogin();
+}, []);
+
+
 
   return (
     <LinearGradient

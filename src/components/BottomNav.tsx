@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet,Alert } from "react-native";
 import {
   Home,
   Calendar,
@@ -7,6 +7,10 @@ import {
   ClipboardList,
   User
 } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { LogOut } from "lucide-react-native";
+
 
 type Props = {
   active: string;
@@ -14,13 +18,35 @@ type Props = {
 };
 
 const BottomNav: React.FC<Props> = ({ active, onChange }) => {
+  const navigation = useNavigation<any>();
+
+const handleLogout = () => {
+  Alert.alert(
+    "Logout",
+    "Are you sure you want to logout?",
+    [
+      {
+        text: "No",
+        style: "cancel"
+      },
+      {
+        text: "Yes",
+        onPress: async () => {
+          await AsyncStorage.clear();
+          navigation.replace("Welcome"); // change if your login screen name differs
+        }
+      }
+    ]
+  );
+};
 
   const tabs = [
     { label: "Home", route: "HomeDashboard", icon: Home },
     { label: "Calendar", route: "PeriodCalendar", icon: Calendar },
     { label: "AI", route: "AI", icon: Sparkles },
     { label: "Log", route: "Log", icon: ClipboardList },
-    { label: "Profile", route: "Profile", icon: User }
+    { label: "Profile", route: "Profile", icon: User },
+    { label: "Logout", route: "Logout", icon: LogOut }
   ];
 
   return (
@@ -33,7 +59,14 @@ const BottomNav: React.FC<Props> = ({ active, onChange }) => {
           <TouchableOpacity
             key={tab.route}
             style={styles.item}
-            onPress={() => onChange && onChange(tab.route)}
+            onPress={() => {
+  if (tab.route === "Logout") {
+    handleLogout();
+  } else {
+    onChange && onChange(tab.route);
+  }
+}}
+            // onPress={() => onChange && onChange(tab.route)}
           >
             <Icon
               size={24}

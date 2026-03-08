@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,12 @@ import {
 import HormoneGraph from "./graph";
 import BottomNav from "../components/BottomNav";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* ================================
    INFO CARD
 ================================ */
+
 
 type InfoCardProps = {
   title: string;
@@ -59,11 +61,43 @@ const SmallCard: React.FC<SmallCardProps> = ({
   );
 };
 
+
 /* ================================
    MAIN SCREEN
 ================================ */
 
 const HormoneDashboard: React.FC = () => {
+const [homeData, setHomeData] = useState<any>(null);
+useEffect(() => {
+  getHomeData();
+}, []);
+const getHomeData = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+
+    const response = await fetch(
+      "https://her-solace-api.vercel.app/api/cycle/prediction",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+      setHomeData(result.data);
+      console.log("Home Data:", result.data);
+    } else {
+      console.log("API Error");
+    }
+  } catch (error) {
+    console.log("Error:", error);
+  }
+};
   const navigation = useNavigation<any>();
   return (
       <View style={{ flex: 1 }}>
@@ -76,7 +110,7 @@ const HormoneDashboard: React.FC = () => {
 
       <View style={styles.graphCard}>
         <Text style={styles.dayTitle}>
-          Day 22 • Luteal Phase
+          Day {homeData?.currentDay}• {homeData?.phase}
         </Text>
 
         <Text style={styles.subtitle}>
@@ -94,26 +128,26 @@ const HormoneDashboard: React.FC = () => {
       <View style={styles.grid}>
         <InfoCard
           title="Energy ✨"
-          value="Moderate"
-          sub="Progesterone dominant"
+          value={homeData?.cycleGuide?.energy}
+          sub={homeData?.cycleGuide?.physical_state}
         />
 
         <InfoCard
           title="Mood 😊"
-          value="Sensitive"
-          sub="Late luteal phase detected"
+          value={homeData?.cycleGuide?.mood}
+          sub={homeData?.cycleGuide?.mental_state}
         />
 
         <InfoCard
           title="Anxiety 🌿"
-          value="Slightly Elevated"
+          value={homeData?.cycleGuide?.anxiety}
           sub="Common before period"
         />
 
         <InfoCard
           title="Social 🤝"
-          value="Low Drive"
-          sub="Plan lighter conversations"
+          value={homeData?.cycleGuide?.focus}
+          sub={homeData?.cycleGuide?.social_drive}
         />
       </View>
 
@@ -121,7 +155,7 @@ const HormoneDashboard: React.FC = () => {
 
       <TouchableOpacity style={styles.logButton}>
         <Text style={styles.logText}>
-          ＋ Log Your Symptoms
+          <Text style={styles.plusSymbol}>＋</Text> Log Your Symptoms
         </Text>
       </TouchableOpacity>
 
@@ -130,17 +164,17 @@ const HormoneDashboard: React.FC = () => {
       <View style={styles.bottomRow}>
         <SmallCard
           title="Nutrition"
-          desc="Magnesium-rich foods may help."
+          desc={homeData?.cycleGuide?.nutrients}
         />
 
         <SmallCard
           title="Movement"
-          desc="Try a gentle walk or stretching."
+          desc={homeData?.cycleGuide?.physical_state}
         />
 
         <SmallCard
           title="Mindful Insight"
-          desc="Reflective time before your cycle."
+          desc={homeData?.cycleGuide?.mental_state}
         />
       </View>
     </ScrollView>
@@ -246,6 +280,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 15,
   },
+  plusSymbol: {
+  fontSize: 22,
+  fontWeight: "bold",
+  color: "#ffffff",
+},
 
   /* BOTTOM CARDS */
 
