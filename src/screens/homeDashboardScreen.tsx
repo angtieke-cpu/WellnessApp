@@ -114,8 +114,7 @@ const getHomeData = async () => {
         </Text>
 
         <Text style={styles.subtitle}>
-          Progesterone dominant • Emotional sensitivity may
-          increase.
+          {homeData?.cycleGuide?.physical_state} • {homeData?.cycleGuide?.mental_state}
         </Text>
 
         <View style={styles.graphWrapper}>
