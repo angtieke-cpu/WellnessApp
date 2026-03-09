@@ -1,4 +1,3 @@
-// import PageWrapper from "@/pageWrapper";
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -11,49 +10,73 @@ import {
   Image
 } from "react-native";
 import PageWrapper from "../pageWrapper";
+import BottomNav from "../components/BottomNav";
+import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
-/* ================= DATA ================= */
+/* ================= INSIGHT DATA ================= */
 
 const insights = [
   {
-    icon: "🏋️",
+    icon: "🏋️‍♀️",
     title: "Exercise Optimization",
     text:
       "Your estrogen is rising during this follicular phase. Perfect time for strength training and HIIT workouts.",
     tag: "High Intensity Recommended",
-    progress: 75,
+    progress: 80,
     tagColor: "#2E7D32"
   },
   {
     icon: "🥗",
     title: "Nutrition Guidance",
     text:
-      "Increase protein and iron-rich foods. Focus on lean meats, leafy greens, and complex carbs.",
+      "Increase protein and iron-rich foods. Focus on leafy greens, lean meats, and complex carbs.",
     tag: "Protein Focus",
-    progress: 65,
+    progress: 70,
     tagColor: "#1565C0"
+  },
+  {
+    icon: "😴",
+    title: "Sleep Pattern",
+    text:
+      "Your body benefits from 7-8 hours of sleep during this phase. Try consistent bedtime routines.",
+    tag: "Restorative Sleep",
+    progress: 65,
+    tagColor: "#6A1B9A"
+  },
+  {
+    icon: "💡",
+    title: "Symptom Forecast",
+    text:
+      "Low symptom burden expected for the next 7 days. Mild bloating possible around ovulation.",
+    tag: "Minimal Symptoms",
+    progress: 50,
+    tagColor: "#EF6C00"
   }
 ];
 
-/* ================= AI PAGE ================= */
+/* ================= AI SCREEN ================= */
 
 const AI: React.FC = () => {
   const flatListRef = useRef<FlatList>(null);
   const [openChat, setOpenChat] = useState(false);
   const [index, setIndex] = useState(0);
+  const navigation = useNavigation<any>();
 
-  /* ---------- auto slide ---------- */
+  /* ---------- AUTO SLIDER ---------- */
+
   useEffect(() => {
     const interval = setInterval(() => {
-      const nextIndex = (index + 1) % insights.length;
+      const next = (index + 1) % insights.length;
+
       flatListRef.current?.scrollToIndex({
-        index: nextIndex,
+        index: next,
         animated: true
       });
-      setIndex(nextIndex);
-    }, 3500);
+
+      setIndex(next);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [index]);
@@ -62,6 +85,7 @@ const AI: React.FC = () => {
     <PageWrapper active="active">
 
       {/* ================= HEADER ================= */}
+
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Your Digital Twin</Text>
 
@@ -73,18 +97,24 @@ const AI: React.FC = () => {
         </View>
 
         <Text style={styles.brand}>Her Solace</Text>
-        <Text style={{ color: "#fff" }}>
+
+        <Text style={styles.subtitle}>
           Decode Hormones - Discover You
         </Text>
 
         <View style={styles.statusPill}>
-          <Text style={{ color: "#fff", fontSize: 12 }}>
+          <Text style={styles.statusText}>
             ✓ Synced & Active
           </Text>
         </View>
+
+        <Text style={styles.aiText}>
+          AI model processing your unique hormonal patterns
+        </Text>
       </View>
 
-      {/* ================= INSIGHT SLIDER ================= */}
+      {/* ================= SLIDER ================= */}
+
       <FlatList
         ref={flatListRef}
         data={insights}
@@ -92,36 +122,55 @@ const AI: React.FC = () => {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         keyExtractor={(_, i) => i.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.slide}>
-            <Text style={{ fontSize: 22 }}>{item.icon}</Text>
-            <Text style={styles.slideTitle}>{item.title}</Text>
-            <Text style={styles.slideText}>{item.text}</Text>
+       renderItem={({ item }) => (
+  <View style={styles.slideWrapper}>
+    <View style={styles.card}>
 
-            <View
-              style={[
-                styles.tag,
-                { borderColor: item.tagColor }
-              ]}
-            >
-              <Text style={{ color: item.tagColor, fontSize: 12 }}>
-                {item.tag}
-              </Text>
-            </View>
+      <View style={styles.cardHeader}>
+        <Text style={styles.icon}>{item.icon}</Text>
+        <Text style={styles.cardTitle}>{item.title}</Text>
+      </View>
 
-            <View style={styles.progressTrack}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${item.progress}%` }
-                ]}
-              />
-            </View>
-          </View>
-        )}
+      <Text style={styles.cardText}>
+        {item.text}
+      </Text>
+
+      <View style={[styles.tag,{borderColor:item.tagColor}]}>
+        <Text style={{color:item.tagColor,fontSize:12}}>
+          {item.tag}
+        </Text>
+      </View>
+
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${item.progress}%` }
+          ]}
+        />
+      </View>
+
+    </View>
+  </View>
+)}
       />
 
-      {/* ================= CHAT FAB ================= */}
+      {/* ================= DOTS ================= */}
+
+      <View style={styles.dots}>
+        {insights.map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              i === index && styles.activeDot
+            ]}
+          />
+        ))}
+      </View>
+
+      {/* ================= CHAT BUTTON ================= */}
+
       <TouchableOpacity
         style={styles.chatFab}
         onPress={() => setOpenChat(true)}
@@ -130,10 +179,15 @@ const AI: React.FC = () => {
       </TouchableOpacity>
 
       {/* ================= CHAT WINDOW ================= */}
+
       {openChat && (
         <View style={styles.chatSheet}>
+
           <View style={styles.chatHeader}>
-            <Text style={{ fontWeight: "600" }}>AI Assistant</Text>
+            <Text style={{ fontWeight: "600" }}>
+              AI Assistant
+            </Text>
+
             <TouchableOpacity onPress={() => setOpenChat(false)}>
               <Text>✕</Text>
             </TouchableOpacity>
@@ -151,19 +205,29 @@ const AI: React.FC = () => {
               placeholder="Ask your question…"
               style={styles.chatInput}
             />
+
             <TouchableOpacity style={styles.sendBtn}>
               <Text style={{ color: "#fff" }}>➤</Text>
             </TouchableOpacity>
           </View>
+
         </View>
       )}
+
+      {/* ================= NAV ================= */}
+
+      <BottomNav
+        active="AI"
+        onChange={(route) => navigation.navigate(route)}
+      />
+
     </PageWrapper>
   );
 };
 
 export default AI;
 
-/* ================= Chat Bubble ================= */
+/* ================= CHAT BUBBLE ================= */
 
 const ChatBubble = ({
   from,
@@ -189,18 +253,20 @@ const ChatBubble = ({
 /* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
+
   header: {
-    backgroundColor: "rgb(225,184,190)",
-    padding: 16,
-    borderRadius: 20,
+    backgroundColor: "#E1B8BE",
+    padding: 18,
+    borderRadius: 22,
     alignItems: "center",
-    marginBottom: 16
+    marginBottom: 20
   },
+
   headerTitle: {
     color: "#fff",
-    fontSize: 16,
-    marginBottom: 8
+    fontSize: 16
   },
+
   avatar: {
     width: 72,
     height: 72,
@@ -210,50 +276,162 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 12
   },
+
   brand: {
     color: "#fff",
-    fontSize: 20,
-    marginTop: 8
+    fontSize: 22,
+    fontWeight: "700"
   },
+
+  subtitle: {
+    color: "#fff",
+    marginTop: 6
+  },
+
+  aiText: {
+    color: "#fff",
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: "center"
+  },
+
   statusPill: {
     backgroundColor: "#debabc",
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 8
+    borderRadius: 20,
+    marginTop: 10
   },
+
+  statusText: {
+    color: "#fff",
+    fontSize: 12
+  },
+
   slide: {
     width: width - 32,
-    backgroundColor: "rgb(225,184,190)",
-    padding: 16,
-    borderRadius: 20,
+    backgroundColor: "#E1B8BE",
+    padding: 20,
+    borderRadius: 22,
     marginHorizontal: 16
   },
+
+  // icon: {
+  //   fontSize: 26
+  // },
+
   slideTitle: {
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
     marginVertical: 6
   },
+
   slideText: {
-    fontSize: 13
+    fontSize: 13,
+    color: "#333"
   },
-  tag: {
-    marginTop: 8,
-    padding: 6,
-    borderRadius: 12,
+
+  badge: {
+    marginTop: 12,
     borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
     alignSelf: "flex-start"
   },
-  progressTrack: {
-    height: 6,
-    backgroundColor: "#eee",
-    borderRadius: 6,
+
+  // progressTrack: {
+  //   height: 6,
+  //   backgroundColor: "#eee",
+  //   borderRadius: 6,
+  //   marginTop: 14
+  // },
+
+  // progressFill: {
+  //   height: 6,
+  //   backgroundColor: "#debabc",
+  //   borderRadius: 6
+  // },
+  slideWrapper:{
+  width:width,
+  paddingHorizontal:18,
+  paddingTop:10
+},
+
+card:{
+  backgroundColor:"#ffffff",
+  borderRadius:24,
+  padding:18,
+  shadowColor:"#000",
+  shadowOpacity:0.08,
+  shadowRadius:12,
+  elevation:4
+},
+
+cardHeader:{
+  flexDirection:"row",
+  alignItems:"center",
+  marginBottom:8
+},
+
+icon:{
+  fontSize:24,
+  marginRight:8
+},
+
+cardTitle:{
+  fontSize:16,
+  fontWeight:"700",
+  color:"#111"
+},
+
+cardText:{
+  fontSize:13,
+  color:"#555",
+  lineHeight:18,
+  marginBottom:12
+},
+
+tag:{
+  alignSelf:"flex-start",
+  borderWidth:1,
+  paddingHorizontal:12,
+  paddingVertical:6,
+  borderRadius:20,
+  backgroundColor:"#FFF7F8",
+  marginBottom:12
+},
+
+progressTrack:{
+  height:6,
+  backgroundColor:"#f1f1f1",
+  borderRadius:10
+},
+
+progressFill:{
+  height:6,
+  backgroundColor:"#E1B8BE",
+  borderRadius:10
+},
+
+  dots: {
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 12
   },
-  progressFill: {
-    height: 6,
-    backgroundColor: "rgb(225,184,190)",
-    borderRadius: 6
+
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#ccc",
+    marginHorizontal: 4
   },
+
+  activeDot: {
+    backgroundColor: "#debabc"
+  },
+
   chatFab: {
     position: "absolute",
     bottom: 100,
@@ -261,11 +439,12 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "rgb(225,184,190)",
+    backgroundColor: "#debabc",
     justifyContent: "center",
     alignItems: "center",
     elevation: 6
   },
+
   chatSheet: {
     position: "absolute",
     bottom: 0,
@@ -276,31 +455,37 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24
   },
+
   chatHeader: {
     padding: 16,
     flexDirection: "row",
     justifyContent: "space-between"
   },
+
   chatBody: {
     flex: 1,
     padding: 16
   },
+
   bubble: {
     maxWidth: "80%",
     padding: 10,
     borderRadius: 14,
     marginBottom: 10
   },
+
   chatInputRow: {
     flexDirection: "row",
     padding: 12
   },
+
   chatInput: {
     flex: 1,
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 10
   },
+
   sendBtn: {
     backgroundColor: "#debabc",
     paddingHorizontal: 14,
@@ -308,4 +493,5 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginLeft: 8
   }
+
 });

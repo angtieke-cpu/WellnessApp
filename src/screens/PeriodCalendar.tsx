@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView,TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { format, subDays, eachDayOfInterval } from "date-fns";
 import BottomNav from "../components/BottomNav";
@@ -11,6 +11,7 @@ export default function PeriodCalendar() {
   const navigation = useNavigation<any>();
 
   const [calenderData, setCalenderData] = useState<any>(null);
+
 
   const periodLength = 5;
 
@@ -65,6 +66,11 @@ export default function PeriodCalendar() {
   const diffTime = today.getTime() - lastPeriod.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   const currentCycleDay = (diffDays % cycleLength) + 1;
+    const [showLogModal, setShowLogModal] = useState(false);
+
+const [selectedDate, setSelectedDate] = useState<Date>(
+  lastPeriod
+);
 
   const getDate = (date: Date) => date.toISOString().split("T")[0];
 
@@ -191,6 +197,42 @@ export default function PeriodCalendar() {
 
   }
 
+  const savePeriod = async () => {
+  try {
+
+    const token = await AsyncStorage.getItem("token");
+
+    const body = {
+      lastPeriodDate:
+        selectedDate.toISOString().split("T")[0]
+    };
+
+    const response = await fetch(
+      "https://her-solace-api.vercel.app/api/journey/details",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      }
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+      setShowLogModal(false);
+
+      // refresh calendar
+      getCalendarData();
+    }
+
+  } catch (err) {
+    console.log("Save error", err);
+  }
+};
+
 
 
   return (
@@ -202,7 +244,7 @@ export default function PeriodCalendar() {
         contentContainerStyle={{ paddingBottom: 90 }}
       >
 
-        <Text style={styles.logBtn}>🩸 Log Period</Text>
+        <Text style={styles.logBtn} onPress={() => setShowLogModal(true)}>🩸 Log Period</Text>
 
         <Calendar
           markingType={"custom"}
@@ -296,6 +338,58 @@ export default function PeriodCalendar() {
         </View>
 
       </ScrollView>
+      {showLogModal && (
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalCard}>
+
+      <Text style={styles.modalTitle}>
+        Last Period Date
+      </Text>
+
+      <Calendar
+        maxDate={new Date().toISOString().split("T")[0]}
+        minDate={calenderData?.lastPeriodDate}
+        markedDates={{
+          [selectedDate.toISOString().split("T")[0]]: {
+            selected: true,
+            selectedColor: "#c08497"
+          }
+        }}
+        onDayPress={(day) =>
+          setSelectedDate(new Date(day.dateString))
+        }
+        theme={{
+          todayTextColor: "#c08497",
+          selectedDayBackgroundColor: "#c08497",
+          arrowColor: "#c08497"
+        }}
+      />
+
+      {/* Buttons */}
+
+      <View style={styles.modalBtnRow}>
+
+        <TouchableOpacity
+          style={styles.cancelBtn}
+          onPress={() => setShowLogModal(false)}
+        >
+          <Text>Cancel</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.saveBtn}
+          onPress={savePeriod}
+        >
+          <Text style={{ color: "#fff" }}>
+            Save
+          </Text>
+        </TouchableOpacity>
+
+      </View>
+
+    </View>
+  </View>
+)}
 
       <BottomNav
         active="PeriodCalendar"
@@ -303,6 +397,7 @@ export default function PeriodCalendar() {
       />
 
     </View>
+    
   );
 }
 
@@ -342,7 +437,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     color: "white",
     fontWeight: "600",
-    marginBottom: 15
+    marginBottom: 15,
   },
 
   /* Cycle Trends */
@@ -384,6 +479,47 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     fontWeight: "600"
-  }
+  },
+  modalOverlay:{
+  position:"absolute",
+  top:0,
+  left:0,
+  right:0,
+  bottom:0,
+  backgroundColor:"rgba(0,0,0,0.4)",
+  justifyContent:"center",
+  alignItems:"center"
+},
+
+modalCard:{
+  width:"90%",
+  backgroundColor:"#fff",
+  borderRadius:20,
+  padding:20
+},
+
+modalTitle:{
+  fontSize:18,
+  fontWeight:"600",
+  marginBottom:10,
+  textAlign:"center"
+},
+
+modalBtnRow:{
+  flexDirection:"row",
+  justifyContent:"space-between",
+  marginTop:15
+},
+
+cancelBtn:{
+  padding:10
+},
+
+saveBtn:{
+  backgroundColor:"#c08497",
+  paddingHorizontal:20,
+  paddingVertical:10,
+  borderRadius:10
+}
 
 });
