@@ -41,8 +41,8 @@ const handleLogout = () => {
 };
 
   const tabs = [
-    // { label: "Home", route: "HomeDashboard", icon: Home },
-    { label: "Home", route: "StartJourney", icon: Home },
+    { label: "Home", route: "HomeDashboard", icon: Home },
+    // { label: "Home", route: "StartJourney", icon: Home },
     { label: "Calendar", route: "PeriodCalendar", icon: Calendar },
     { label: "AI", route: "AI", icon: Sparkles },
     { label: "Log", route: "Log", icon: ClipboardList },
