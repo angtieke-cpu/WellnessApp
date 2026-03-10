@@ -27,7 +27,7 @@ export default function PeriodCalendar() {
       const token = await AsyncStorage.getItem("token");
 
       const response = await fetch(
-        "https://her-solace-api.vercel.app/api/journey/cycle-details",
+        "https://her-solace-api.vercel.app/api/cycle/cycle-details",
         {
           method: "GET",
           headers: {
@@ -203,12 +203,12 @@ const [selectedDate, setSelectedDate] = useState<Date>(
     const token = await AsyncStorage.getItem("token");
 
     const body = {
-      lastPeriodDate:
+      periodDate:
         selectedDate.toISOString().split("T")[0]
     };
 
     const response = await fetch(
-      "https://her-solace-api.vercel.app/api/journey/details",
+      "https://her-solace-api.vercel.app/api/cycle/period-date",
       {
         method: "POST",
         headers: {

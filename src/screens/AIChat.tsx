@@ -12,53 +12,55 @@ import {
 import PageWrapper from "../pageWrapper";
 import BottomNav from "../components/BottomNav";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
 /* ================= INSIGHT DATA ================= */
 
-const insights = [
-  {
-    icon: "🏋️‍♀️",
-    title: "Exercise Optimization",
-    text:
-      "Your estrogen is rising during this follicular phase. Perfect time for strength training and HIIT workouts.",
-    tag: "High Intensity Recommended",
-    progress: 80,
-    tagColor: "#2E7D32"
-  },
-  {
-    icon: "🥗",
-    title: "Nutrition Guidance",
-    text:
-      "Increase protein and iron-rich foods. Focus on leafy greens, lean meats, and complex carbs.",
-    tag: "Protein Focus",
-    progress: 70,
-    tagColor: "#1565C0"
-  },
-  {
-    icon: "😴",
-    title: "Sleep Pattern",
-    text:
-      "Your body benefits from 7-8 hours of sleep during this phase. Try consistent bedtime routines.",
-    tag: "Restorative Sleep",
-    progress: 65,
-    tagColor: "#6A1B9A"
-  },
-  {
-    icon: "💡",
-    title: "Symptom Forecast",
-    text:
-      "Low symptom burden expected for the next 7 days. Mild bloating possible around ovulation.",
-    tag: "Minimal Symptoms",
-    progress: 50,
-    tagColor: "#EF6C00"
-  }
-];
+// const insights = [
+//   {
+//     icon: "🏋️‍♀️",
+//     title: "Exercise Optimization",
+//     text:
+//       "Your estrogen is rising during this follicular phase. Perfect time for strength training and HIIT workouts.",
+//     tag: "High Intensity Recommended",
+//     progress: 80,
+//     tagColor: "#2E7D32"
+//   },
+//   {
+//     icon: "🥗",
+//     title: "Nutrition Guidance",
+//     text:
+//       "Increase protein and iron-rich foods. Focus on leafy greens, lean meats, and complex carbs.",
+//     tag: "Protein Focus",
+//     progress: 70,
+//     tagColor: "#1565C0"
+//   },
+//   {
+//     icon: "😴",
+//     title: "Sleep Pattern",
+//     text:
+//       "Your body benefits from 7-8 hours of sleep during this phase. Try consistent bedtime routines.",
+//     tag: "Restorative Sleep",
+//     progress: 65,
+//     tagColor: "#6A1B9A"
+//   },
+//   {
+//     icon: "💡",
+//     title: "Symptom Forecast",
+//     text:
+//       "Low symptom burden expected for the next 7 days. Mild bloating possible around ovulation.",
+//     tag: "Minimal Symptoms",
+//     progress: 50,
+//     tagColor: "#EF6C00"
+//   }
+// ];
 
 /* ================= AI SCREEN ================= */
 
 const AI: React.FC = () => {
+  const [insightData, setInsightData] = useState<any>(null);
   const flatListRef = useRef<FlatList>(null);
   const [openChat, setOpenChat] = useState(false);
   const [index, setIndex] = useState(0);
@@ -66,9 +68,62 @@ const AI: React.FC = () => {
 
   /* ---------- AUTO SLIDER ---------- */
 
+ 
+   const getData = async () => {
+    try {
+
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await fetch(
+        "https://her-solace-api.vercel.app/api/ai/cycle-insights",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+
+        let jsonString = result.aiInsights;
+
+        jsonString = jsonString
+          .replace(/```json/g, "")
+          .replace(/```/g, "")
+          .trim();
+
+        const parsed = JSON.parse(jsonString);
+
+        setInsightData(parsed);
+
+      } else {
+        console.log("API Error");
+      }
+
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  /* ================= LOAD DATA ================= */
+
   useEffect(() => {
+    getData();
+  }, []);
+
+  /* ================= AUTO SLIDER ================= */
+
+  useEffect(() => {
+
+    if (!insightData) return;
+
     const interval = setInterval(() => {
-      const next = (index + 1) % insights.length;
+
+      const next = (index + 1) % 4;
 
       flatListRef.current?.scrollToIndex({
         index: next,
@@ -76,10 +131,60 @@ const AI: React.FC = () => {
       });
 
       setIndex(next);
+
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [index]);
+
+  }, [index, insightData]);
+
+  /* ================= LOADING SCREEN ================= */
+
+  if (!insightData) {
+    return (
+      <View style={{ flex:1, justifyContent:"center", alignItems:"center" }}>
+        <Text>Loading AI Insights...</Text>
+      </View>
+    );
+  }
+
+  /* ================= CARD DATA ================= */
+
+  const insights = [
+    {
+      icon: "🏋️‍♀️",
+      title: "Exercise Optimization",
+      text: insightData.exerciseOptimization,
+      tag: "Workout Advice",
+      progress: 80,
+      tagColor: "#2E7D32"
+    },
+    {
+      icon: "🥗",
+      title: "Nutrition Guidance",
+      text: insightData.nutritionGuidance,
+      tag: "Nutrition",
+      progress: 70,
+      tagColor: "#1565C0"
+    },
+    {
+      icon: "😴",
+      title: "Sleep Pattern",
+      text: insightData.sleepPattern,
+      tag: "Sleep Health",
+      progress: 65,
+      tagColor: "#6A1B9A"
+    },
+    {
+      icon: "💡",
+      title: "Symptom Forecast",
+      text: insightData.symptomsForecast,
+      tag: "Prediction",
+      progress: 50,
+      tagColor: "#EF6C00"
+    }
+  ];
+
 
   return (
     <PageWrapper active="active">
