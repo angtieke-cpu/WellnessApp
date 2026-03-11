@@ -152,7 +152,7 @@ export default function Profile() {
     };
 
     const response = await fetch(
-      'https://her-solace-api.vercel.app/api/user/update',
+      'https://her-solace-api.vercel.app/api/user/user-details',
       {
         method: 'POST',
         headers: {
