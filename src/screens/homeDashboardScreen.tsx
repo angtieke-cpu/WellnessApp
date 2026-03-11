@@ -119,6 +119,7 @@ const getHomeData = async () => {
 
         <View style={styles.graphWrapper}>
           <HormoneGraph />
+ 
         </View>
       </View>
 

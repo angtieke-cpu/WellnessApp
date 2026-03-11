@@ -1,4 +1,4 @@
-import { theme } from "../theme";
+import { theme } from '../theme';
 
 interface HeaderProps {
   title: string;
@@ -11,7 +11,7 @@ export default function Header({ title }: HeaderProps) {
         style={{
           color: theme.text,
           fontWeight: 600,
-          letterSpacing: "-0.3px",
+          letterSpacing: '-0.3px',
         }}
       >
         {title}

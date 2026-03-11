@@ -1,9 +1,9 @@
-import Card from "../components/Card";
-import BottomNav from "../components/BottomNav";
-import Header from "../components/Header";
+import Card from '../components/Card';
+import BottomNav from '../components/BottomNav';
+import Header from '../components/Header';
 // import { theme } from "@/theme";
-import { StyleSheet } from "react-native";
-import { theme } from "../theme";
+import { StyleSheet } from 'react-native';
+import { theme } from '../theme';
 
 type Props = {
   onTab: (tab: string) => void;
@@ -11,8 +11,8 @@ type Props = {
 
 export default function Calendar({ onTab }: Props) {
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
-//   const route = useRoute();
-// const navigation = useNavigation();
+  //   const route = useRoute();
+  // const navigation = useNavigation();
 
   return (
     <div style={styles.container}>
@@ -25,8 +25,8 @@ export default function Calendar({ onTab }: Props) {
               key={day}
               style={{
                 ...styles.cell,
-                background: day === 25 ? theme.primary : "transparent",
-                color: day === 25 ? "#fff" : theme.text
+                background: day === 25 ? theme.primary : 'transparent',
+                color: day === 25 ? '#fff' : theme.text,
               }}
             >
               {day}
@@ -53,24 +53,24 @@ export default function Calendar({ onTab }: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.bg,
-    flex: 1,               // instead of minHeight: "100vh"
+    flex: 1, // instead of minHeight: "100vh"
     padding: 16,
     paddingBottom: 80,
     maxWidth: 420,
-    alignSelf: "center"    // instead of margin: "0 auto"
+    alignSelf: 'center', // instead of margin: "0 auto"
   },
 
   grid: {
-    flexDirection: "row",  // RN doesn't support display: grid
-    flexWrap: "wrap",
-    justifyContent: "space-between"
+    flexDirection: 'row', // RN doesn't support display: grid
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
 
   cell: {
-    width: "13%",          // approx 7 columns
+    width: '13%', // approx 7 columns
     padding: 10,
     borderRadius: 10,
     fontSize: 14,
-    textAlign: "center"
-  }
+    textAlign: 'center',
+  },
 });

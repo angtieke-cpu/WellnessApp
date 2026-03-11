@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 /* Screens */
-import AgeStep from "./screens/AgeStep";
+
 import DOBStep from "./screens/DOB";
 import LastPeriodStep from "./screens/LastPeriod";
 import Home from "./screens/Home";
@@ -19,17 +19,14 @@ import OTPScreen from "./screens/OTPScreen";
 import RegistrationScreen from "./screens/registration";
 import RegisterOTPScreen from "./screens/registrationOTP";
 import HormoneDashboard from "./screens/homeDashboardScreen";
-import StepSix from "./screens/StepEight";
 import PeriodCalendar from "./screens/PeriodCalendar";
+import Log from "./screens/Log";
 // import MainTabs from "./components/MainTabs";
 
 export type RootStackParamList = {
   StartJourney: { userId: string };
   AgeStep: undefined;
   DOBStep: undefined;
-  StepSix: undefined;
-  StepSeven: undefined;
-  StepEight: undefined;
   LastPeriod: undefined;
   Home: undefined;
   Fertility: undefined;
@@ -38,6 +35,7 @@ export type RootStackParamList = {
   Profile: undefined;
   CycleLength: undefined;
    Welcome: undefined;
+   Log: undefined;
    PeriodCalendar:undefined;
   //  MainTabs:undefined;
    HomeDashboard:{ userId: string }
@@ -57,11 +55,7 @@ export default function App() {
            <Stack.Screen name="RegistrationScreen" component={RegistrationScreen} />
            <Stack.Screen name="RegisterOTP" component={RegisterOTPScreen} />
         <Stack.Screen name="StartJourney" component={StartJourney} />
-        <Stack.Screen name="AgeStep" component={AgeStep} />
         <Stack.Screen name="DOBStep" component={DOBStep} />
-        <Stack.Screen name="StepSix" component={StepSix} />
-        <Stack.Screen name="StepSeven" component={DOBStep} />
-        <Stack.Screen name="StepEight" component={DOBStep} />
         <Stack.Screen name="PeriodCalendar" component={PeriodCalendar} />
         <Stack.Screen name="LastPeriod" component={LastPeriodStep} />
         <Stack.Screen name="CycleLength" component={CycleLength} />
@@ -71,6 +65,7 @@ export default function App() {
         <Stack.Screen name="AI" component={AI} />
         <Stack.Screen name="Insights" component={Insights} />
         <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="Log" component={Log} />
           {/* <Stack.Screen name="MainTabs" component={MainTabs} /> */}
       
         <Stack.Screen name="LoginScreen" component={LoginScreen} />

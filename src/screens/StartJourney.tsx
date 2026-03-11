@@ -20,19 +20,22 @@ export default function StartJourney() {
   const navigation = useNavigation<any>();
   const flatRef = useRef<FlatList<number>>(null);
 
-  const TOTAL_STEPS = 9;
+  const TOTAL_STEPS = 10;
   const today = new Date();
 
   const [index, setIndex] = useState(0);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerField, setPickerField] =
     useState<"dob" | "lastPeriod">("dob");
+const maxDOB = new Date();
+maxDOB.setFullYear(maxDOB.getFullYear() - 13);
 
   const [data, setData] = useState({
     ageGroup: "",
     dob: today,
     cycleLength: 28,
     lastPeriod: today,
+    bleedingDays: 5, 
     symptoms: [] as string[],
     goals: [] as string[],
     conditions: [] as string[],
@@ -54,23 +57,27 @@ export default function StartJourney() {
     Alert.alert("Please select cycle length");
     return;
   }
+  if (index === 4 && !data.bleedingDays) {
+  Alert.alert("Please select bleeding days");
+  return;
+}
 
-  if (index === 4 && data.symptoms.length === 0) {
+  if (index === 5 && data.symptoms.length === 0) {
     Alert.alert("Please select at least one symptom");
     return;
   }
 
-  if (index === 5 && data.goals.length === 0) {
+  if (index === 6 && data.goals.length === 0) {
     Alert.alert("Please select at least one wellness goal");
     return;
   }
 
-  if (index === 6 && data.conditions.length === 0) {
+  if (index === 7 && data.conditions.length === 0) {
     Alert.alert("Please select condition or None");
     return;
   }
 
-  if (index === 7 && data.advancedSymptoms.length === 0) {
+  if (index === 8 && data.advancedSymptoms.length === 0) {
     Alert.alert("Please select symptoms to track");
     return;
   }
@@ -91,22 +98,6 @@ export default function StartJourney() {
     }
   };
 
-  // const finish = async () => {
-  //   try {
-  //     console.log("USER ONBOARDING DATA =>", data);
-
-  //     await AsyncStorage.setItem(
-  //       "onboarding",
-  //       JSON.stringify(data)
-  //     );
-
-  //     // navigation.navigate("Home");
-  //     navigation.navigate("HomeDashboard");
-  //   } catch (error) {
-  //     console.log("Error saving onboarding:", error);
-  //   }
-  // };
-
 
   const finish = async () => {
   try {
@@ -117,6 +108,7 @@ export default function StartJourney() {
       dateOfBirth: data.dob.toISOString().split("T")[0],
       cycleLengthDays: data.cycleLength,
       symptoms: data.symptoms,
+      bleedingDays: data.bleedingDays,
       lastPeriodDate: data.lastPeriod.toISOString().split("T")[0],
       healthGoals: data.goals,
       diagnosedConditions: data.conditions,
@@ -386,8 +378,45 @@ export default function StartJourney() {
             <NavButtons />
           </View>
         );
+        case 4:
+  return (
+    <View style={[styles.card,{width}]}>
+      {renderProgress()}
 
-      case 4:
+      <Text style={styles.step}>Step 4 of 9</Text>
+
+      <Text style={styles.title}>
+        How many days does your bleeding usually last?
+      </Text>
+
+      <Text style={styles.big}>
+        {data.bleedingDays} <Text style={{fontSize:18}}>days</Text>
+      </Text>
+
+      <Slider
+        style={{width:"100%"}}
+        minimumValue={2}
+        maximumValue={10}
+        step={1}
+        value={data.bleedingDays}
+        minimumTrackTintColor="#c08497"
+        maximumTrackTintColor="#ddd"
+        thumbTintColor="#c08497"
+        onValueChange={(v)=>
+          setData({...data,bleedingDays:v})
+        }
+      />
+
+     <View style={styles.sliderLabels}>
+  <Text style={styles.sliderLabel}>2</Text>
+  <Text style={styles.sliderLabel}>10</Text>
+</View>
+
+      <NavButtons/>
+    </View>
+  );
+
+      case 5:
         return (
           <View style={[styles.card , { width }]}>
             {renderProgress()}
@@ -413,7 +442,7 @@ export default function StartJourney() {
           </View>
         );
 
-      case 5:
+      case 6:
         return (
           <View style={[styles.card , { width }]}>
             {renderProgress()}
@@ -441,7 +470,7 @@ export default function StartJourney() {
           </View>
         );
 
-      case 6:
+      case 7:
         return (
           <View style={[styles.card, { width }]}>
             {renderProgress()}
@@ -469,7 +498,7 @@ export default function StartJourney() {
           </View>
         );
 
-            case 7:
+            case 8:
         return (
           <View style={[styles.card, { width }]}>
             {renderProgress()}
@@ -497,7 +526,7 @@ export default function StartJourney() {
           </View>
         );
 
-      case 8:
+      case 9:
         return (
           <View style={[styles.card , { width }]}>
             {renderProgress()}
@@ -535,7 +564,7 @@ export default function StartJourney() {
     <SafeAreaView style={styles.container}>
    <FlatList
   ref={flatRef}
-  data={[0,1,2,3,4,5,6,7,8]}
+  data={[0,1,2,3,4,5,6,7,8,9]}
   horizontal
   pagingEnabled
   scrollEnabled={false}
@@ -558,9 +587,38 @@ export default function StartJourney() {
     </View>
   )}
 />
+{showPicker && (
+  <DateTimePicker
+    value={data[pickerField]}
+    mode="date"
+    maximumDate={pickerField === "dob" ? maxDOB : today}
+    onChange={(_, date) => {
+      setShowPicker(false);
 
+      if (!date) return;
 
-      {showPicker && (
+      if (pickerField === "dob") {
+
+        const age =
+          new Date().getFullYear() - date.getFullYear();
+
+        if (age < 13) {
+          Alert.alert("Minimum age is 13 years");
+          return;
+        }
+
+      }
+
+      setData({
+        ...data,
+        [pickerField]: date
+      });
+
+    }}
+  />
+)}
+
+      {/* {showPicker && (
         <DateTimePicker
           value={data[pickerField]}
           mode="date"
@@ -574,7 +632,7 @@ export default function StartJourney() {
             }
           }}
         />
-      )}
+      )} */}
     </SafeAreaView>
   );
 }
@@ -634,29 +692,36 @@ const styles = StyleSheet.create({
     borderRadius: 20
   },
 
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    marginTop: 20
-  },
+  chips:{
+  flexDirection:"row",
+  flexWrap:"wrap",
+  justifyContent:"space-between",
+  marginTop:20
+},
 
-  chip: {
-    borderWidth: 1.5,
-    borderColor: "#c08497",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 30,
-    margin: 6
-  },
+chip:{
+  width:"48%",
+  borderWidth:1.5,
+  borderColor:"#c08497",
+  paddingVertical:14,
+  borderRadius:12,
+  marginBottom:12,
+  alignItems:"center"
+},
 
-  chipActive: {
-    backgroundColor: "#c08497"
-  },
+chipActive:{
+  backgroundColor:"#c08497"
+},
 
-  chipText: { color: "#c08497" },
+chipText:{
+  color:"#c08497",
+  fontWeight:"600"
+},
 
-  chipTextActive: { color: "#fff" },
+chipTextActive:{
+  color:"#fff",
+  fontWeight:"600"
+},
 
   big: {
     fontSize: 42,
@@ -700,7 +765,18 @@ const styles = StyleSheet.create({
 
   finishBtn: {
     backgroundColor: "#c08497"
-  }
+  },
+  sliderLabels:{
+  flexDirection:"row",
+  justifyContent:"space-between",
+  width:"100%",
+  marginTop:6
+},
+
+sliderLabel:{
+  color:"#777",
+  fontSize:12
+}
 });
 
 
