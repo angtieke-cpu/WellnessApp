@@ -89,16 +89,17 @@ const AI: React.FC = () => {
 
       if (result.success) {
 
-        let jsonString = result.aiInsights;
+        // let jsonString = result.aiInsights;
 
-        jsonString = jsonString
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
-          .trim();
+        // jsonString = jsonString
+        //   .replace(/```json/g, "")
+        //   .replace(/```/g, "")
+        //   .trim();
+        // const result = await response.json();
 
-        const parsed = JSON.parse(jsonString);
+        // const parsed = JSON.parse(jsonString);
 
-        setInsightData(parsed);
+        setInsightData(result.aiInsights);
 
       } else {
         console.log("API Error");
