@@ -9,7 +9,7 @@ import {
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { LogOut } from 'lucide-react-native';
+
 
 type Props = {
   active: string;
@@ -42,7 +42,7 @@ const BottomNav: React.FC<Props> = ({ active, onChange }) => {
     { label: 'AI', route: 'AI', icon: Sparkles },
     { label: 'Log', route: 'Log', icon: ClipboardList },
     { label: 'Profile', route: 'Profile', icon: User },
-    { label: 'Logout', route: 'Logout', icon: LogOut },
+    // { label: 'Logout', route: 'Logout', icon: LogOut },
   ];
 
   return (

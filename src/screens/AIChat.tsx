@@ -7,7 +7,8 @@ import {
   Dimensions,
   TouchableOpacity,
   TextInput,
-  Image
+  Image,
+  ScrollView
 } from "react-native";
 import PageWrapper from "../pageWrapper";
 import BottomNav from "../components/BottomNav";
@@ -191,6 +192,10 @@ const AI: React.FC = () => {
     <PageWrapper active="active">
 
       {/* ================= HEADER ================= */}
+       <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 140 }}
+    >
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Your Digital Twin</Text>
@@ -221,49 +226,36 @@ const AI: React.FC = () => {
 
       {/* ================= SLIDER ================= */}
 
-      <FlatList
-        ref={flatListRef}
-        data={insights}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, i) => i.toString()}
-       renderItem={({ item }) => (
-  <View style={styles.slideWrapper}>
-    <View style={styles.card}>
+ {/* ================= INSIGHT CARDS ================= */}
 
-      <View style={styles.cardHeader}>
-        <Text style={styles.icon}>{item.icon}</Text>
-        <Text style={styles.cardTitle}>{item.title}</Text>
+<View style={styles.cardGrid}>
+
+  {insights.map((item, i) => (
+    <View key={i} style={styles.aiCard}>
+
+      <View style={styles.aiHeader}>
+        <Text style={styles.aiIcon}>{item.icon}</Text>
+        <Text style={styles.aiTitle}>{item.title}</Text>
       </View>
 
-      <Text style={styles.cardText}>
+      <Text style={styles.aiTextCard}>
         {item.text}
       </Text>
 
-      <View style={[styles.tag,{borderColor:item.tagColor}]}>
+      <View style={[styles.aiTag,{borderColor:item.tagColor}]}>
         <Text style={{color:item.tagColor,fontSize:12}}>
           {item.tag}
         </Text>
       </View>
 
-      <View style={styles.progressTrack}>
-        <View
-          style={[
-            styles.progressFill,
-            { width: `${item.progress}%` }
-          ]}
-        />
-      </View>
-
     </View>
-  </View>
-)}
-      />
+  ))}
+
+</View>
 
       {/* ================= DOTS ================= */}
 
-      <View style={styles.dots}>
+      {/* <View style={styles.dots}>
         {insights.map((_, i) => (
           <View
             key={i}
@@ -273,7 +265,7 @@ const AI: React.FC = () => {
             ]}
           />
         ))}
-      </View>
+      </View> */}
 
       {/* ================= CHAT BUTTON ================= */}
 
@@ -322,11 +314,12 @@ const AI: React.FC = () => {
 
       {/* ================= NAV ================= */}
 
-      <BottomNav
+    
+</ScrollView>
+  <BottomNav
         active="AI"
         onChange={(route) => navigation.navigate(route)}
       />
-
     </PageWrapper>
   );
 };
@@ -598,6 +591,57 @@ progressFill:{
     justifyContent: "center",
     borderRadius: 14,
     marginLeft: 8
-  }
+  },
+  cardGrid:{
+  flexDirection:"row",
+  flexWrap:"wrap",
+  justifyContent:"space-between",
+  marginTop:10
+},
+
+aiCard:{
+  width:"48%",
+  backgroundColor:"#ffffff",
+  borderRadius:22,
+  padding:16,
+  marginBottom:16,
+  elevation:5,
+  shadowColor:"#000",
+  shadowOpacity:0.08,
+  shadowRadius:8
+},
+
+aiHeader:{
+  flexDirection:"row",
+  alignItems:"center",
+  marginBottom:8
+},
+
+aiIcon:{
+  fontSize:22,
+  marginRight:6
+},
+
+aiTitle:{
+  fontSize:14,
+  fontWeight:"700",
+  color:"#333"
+},
+
+aiTextCard:{
+  fontSize:12,
+  color:"#555",
+  lineHeight:18,
+  marginBottom:12
+},
+
+aiTag:{
+  borderWidth:1,
+  paddingHorizontal:10,
+  paddingVertical:4,
+  borderRadius:20,
+  alignSelf:"flex-start",
+  backgroundColor:"#FFF7F8"
+}
 
 });

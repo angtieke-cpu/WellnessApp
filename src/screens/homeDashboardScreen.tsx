@@ -39,6 +39,13 @@ const InfoCard: React.FC<InfoCardProps> = ({
     </View>
   );
 };
+const getGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour < 12) return "Good Morning";
+  if (hour < 18) return "Good Afternoon";
+  return "Good Evening";
+};
 
 /* ================================
    SMALL CARD
@@ -109,19 +116,37 @@ const getHomeData = async () => {
       {/* GRAPH CARD */}
 
       <View style={styles.graphCard}>
-        <Text style={styles.dayTitle}>
+        {/* <Text style={styles.dayTitle}>
           Day {homeData?.currentDay}• {homeData?.phase}
         </Text>
 
         <Text style={styles.subtitle}>
           {homeData?.cycleGuide?.physical_state} • {homeData?.cycleGuide?.mental_state}
-        </Text>
+        </Text> */}
 
         <View style={styles.graphWrapper}>
           <HormoneGraph />
  
         </View>
       </View>
+
+      {/* WELCOME NOTE */}
+
+<View style={styles.welcomeCard}>
+
+  <Text style={styles.welcomeTitle}>
+    Hi {homeData?.name ?? "there"}, {getGreeting()} 👋
+  </Text>
+
+  <Text style={styles.welcomeText}>
+    You are in Day {homeData?.currentDay} of your cycle — {homeData?.phase}
+  </Text>
+
+  <Text style={styles.welcomeSub}>
+    {homeData?.cycleGuide?.physical_state} • {homeData?.cycleGuide?.mental_state}
+  </Text>
+
+</View>
 
       {/* INFO GRID */}
 
@@ -312,4 +337,29 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#777",
   },
+  welcomeCard:{
+  backgroundColor:"#ffffff",
+  borderRadius:20,
+  padding:16,
+  marginBottom:20,
+  elevation:4
+},
+
+welcomeTitle:{
+  fontSize:16,
+  fontWeight:"700",
+  color:"#5e4b8b"
+},
+
+welcomeText:{
+  fontSize:14,
+  color:"#444",
+  marginTop:6
+},
+
+welcomeSub:{
+  fontSize:12,
+  color:"#777",
+  marginTop:6
+},
 });

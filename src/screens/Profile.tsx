@@ -11,12 +11,14 @@ import {
   ScrollView,
   TextInput,
   Modal,
+  Alert
 } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomNav from '../components/BottomNav';
 import { useNavigation } from '@react-navigation/native';
+// import { LogOut } from 'lucide-react-native';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -224,6 +226,21 @@ export default function Profile() {
     return new Date(dateString).toLocaleDateString();
   };
   const navigation = useNavigation<any>();
+  const handleLogout = () => {
+  Alert.alert('Logout', 'Are you sure you want to logout?', [
+    {
+      text: 'No',
+      style: 'cancel',
+    },
+    {
+      text: 'Yes',
+      onPress: async () => {
+        await AsyncStorage.clear();
+        navigation.replace('Welcome');
+      },
+    },
+  ]);
+};
 
   /* ================= UI ================= */
   const renderToggle = (
@@ -319,6 +336,12 @@ export default function Profile() {
             {renderToggle('Anonymous Mode', anonymous, setAnonymous)}
             {renderToggle('Notifications', notifications, setNotifications)}
             {renderToggle('Privacy Mode', privacy, setPrivacy)}
+             <TouchableOpacity
+    style={styles.logoutRow}
+    onPress={handleLogout}
+  >
+    <Text style={styles.logoutText}>🔒 Logout</Text>
+  </TouchableOpacity>
           </View>
         </ScrollView>
       </View>
@@ -576,4 +599,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginLeft: 2,
   },
+  logoutRow:{
+  marginTop:12,
+  paddingVertical:14,
+  borderTopWidth:1,
+  borderColor:"#eee",
+  alignItems:"center"
+},
+
+logoutText:{
+  color:"#E53935",
+  fontWeight:"600",
+  fontSize:15
+}
 });

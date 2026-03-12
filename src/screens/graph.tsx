@@ -83,6 +83,7 @@ export default function HormoneGraph() {
         pv = 0.2;
       } else if (day < ov) {
         const progress = (day - bleed) / (ov - bleed);
+
         ev = 0.2 + progress * 0.8;
         pv = 0.2 + progress * 0.2;
       } else if (day === ov) {
@@ -90,6 +91,7 @@ export default function HormoneGraph() {
         pv = 0.3;
       } else {
         const progress = (day - ov) / (cycle - ov);
+
         ev = 0.8 - progress * 0.6;
         pv = 0.3 + progress * 0.7;
       }
@@ -116,89 +118,93 @@ export default function HormoneGraph() {
   const progesteronePath = createLine(progesterone);
 
   const phaseWidth = (width - padding * 2) / 4;
-  const phaseHeight = 26;
 
   return (
     <View>
-      <Svg width={width} height={height + 70}>
-        {/* PHASE BARS */}
+      <Svg width={width} height={height + 40}>
+        {/* PHASE BACKGROUND */}
 
         <Rect
           x={padding}
-          y={height + 5}
+          y={0}
           width={phaseWidth}
-          height={phaseHeight}
-          fill="#F8BBD0"
+          height={height}
+          fill="#FCE4EC"
         />
         <Rect
           x={padding + phaseWidth}
-          y={height + 5}
+          y={0}
           width={phaseWidth}
-          height={phaseHeight}
-          fill="#C8E6C9"
+          height={height}
+          fill="#E8F5E9"
         />
         <Rect
           x={padding + phaseWidth * 2}
-          y={height + 5}
+          y={0}
           width={phaseWidth}
-          height={phaseHeight}
-          fill="#FFF59D"
+          height={height}
+          fill="#FFFDE7"
         />
         <Rect
           x={padding + phaseWidth * 3}
-          y={height + 5}
+          y={0}
           width={phaseWidth}
-          height={phaseHeight}
-          fill="#D1C4E9"
+          height={height}
+          fill="#F3E5F5"
         />
+
+        {/* PHASE LABELS */}
 
         <SvgText
           x={padding + phaseWidth / 2}
-          y={height + 22}
-          fontSize="11"
+          y={14}
+          fontSize="10"
           textAnchor="middle"
         >
           Flow
         </SvgText>
+
         <SvgText
           x={padding + phaseWidth * 1.5}
-          y={height + 22}
-          fontSize="11"
+          y={14}
+          fontSize="10"
           textAnchor="middle"
         >
           Seed
         </SvgText>
+
         <SvgText
           x={padding + phaseWidth * 2.5}
-          y={height + 22}
-          fontSize="11"
+          y={14}
+          fontSize="10"
           textAnchor="middle"
         >
           Bloom
         </SvgText>
+
         <SvgText
           x={padding + phaseWidth * 3.5}
-          y={height + 22}
-          fontSize="11"
+          y={14}
+          fontSize="10"
           textAnchor="middle"
         >
           Moon
         </SvgText>
 
-        {/* ESTROGEN LINE (thin) */}
+        {/* ESTROGEN */}
 
         <Path d={estrogenPath} stroke="#EC407A" strokeWidth={2} fill="none" />
 
-        {/* PROGESTERONE LINE (thin) */}
+        {/* PROGESTERONE */}
 
         <Path
           d={progesteronePath}
-          stroke="#7E57C2"
+          stroke="#7B61FF"
           strokeWidth={2}
           fill="none"
         />
 
-        {/* CURRENT DAY LINE */}
+        {/* TODAY LINE */}
 
         <Line
           x1={
@@ -207,21 +213,11 @@ export default function HormoneGraph() {
           x2={
             padding + (currentDay / (cycleLength - 1)) * (width - padding * 2)
           }
-          y1="0"
+          y1={0}
           y2={height}
           stroke="#42A5F5"
           strokeDasharray="3"
         />
-
-        <SvgText
-          x={padding + (currentDay / (cycleLength - 1)) * (width - padding * 2)}
-          y={-2}
-          fontSize="11"
-          fill="#42A5F5"
-          textAnchor="middle"
-        >
-          Today
-        </SvgText>
 
         {/* OVULATION */}
 
@@ -232,19 +228,10 @@ export default function HormoneGraph() {
           x2={
             padding + (ovulationDay / (cycleLength - 1)) * (width - padding * 2)
           }
-          y1="0"
+          y1={0}
           y2={height}
-          stroke="#FFC107"
+          stroke="#C8A2C8"
           strokeDasharray="4"
-        />
-
-        <Circle
-          cx={
-            padding + (ovulationDay / (cycleLength - 1)) * (width - padding * 2)
-          }
-          cy={height - (progesterone[ovulationDay] || 0) * height}
-          r="5"
-          fill="#FFC107"
         />
 
         {/* X AXIS */}
@@ -256,7 +243,7 @@ export default function HormoneGraph() {
             <SvgText
               key={i}
               x={padding + (i / (cycleLength - 1)) * (width - padding * 2)}
-              y={height + 50}
+              y={height + 18}
               fontSize="10"
               fill="#777"
               textAnchor="middle"
@@ -265,24 +252,31 @@ export default function HormoneGraph() {
             </SvgText>
           );
         })}
+
+        {/* HORMONE LEGEND INSIDE GRAPH */}
+
+        <Rect x={width - 110} y={8} width={10} height={3} fill="#EC407A" />
+        <SvgText x={width - 95} y={11} fontSize="9">
+          Estrogen
+        </SvgText>
+
+        <Rect x={width - 110} y={20} width={10} height={3} fill="#7B61FF" />
+        <SvgText x={width - 95} y={23} fontSize="9">
+          Progesterone
+        </SvgText>
       </Svg>
 
-      {/* LEGEND */}
+      {/* LEGEND BELOW */}
 
       <View style={styles.legendRow}>
         <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#EC407A' }]} />
-          <Text>Estrogen</Text>
-        </View>
-
-        <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#7E57C2' }]} />
-          <Text>Progesterone</Text>
-        </View>
-
-        <View style={styles.legendItem}>
           <View style={[styles.dot, { backgroundColor: '#42A5F5' }]} />
           <Text>Today</Text>
+        </View>
+
+        <View style={styles.legendItem}>
+          <View style={[styles.dot, { backgroundColor: '#C8A2C8' }]} />
+          <Text>Ovulation</Text>
         </View>
       </View>
     </View>
@@ -293,13 +287,13 @@ const styles = StyleSheet.create({
   legendRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: 6,
   },
 
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: 12,
   },
 
   dot: {
